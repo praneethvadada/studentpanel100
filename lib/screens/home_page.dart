@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage> {
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: const Color.fromARGB(255, 177, 238, 220),
       ),
       body: AnimatedSwitcher(
         duration: Duration(milliseconds: 300),

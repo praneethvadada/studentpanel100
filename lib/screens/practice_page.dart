@@ -33,7 +33,7 @@ class PracticePage extends StatelessWidget {
                 child: Text('MCQ', style: TextStyle(fontSize: 18)),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueAccent,
+                backgroundColor: const Color.fromARGB(255, 166, 199, 255),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -54,7 +54,7 @@ class PracticePage extends StatelessWidget {
                 child: Text('Coding', style: TextStyle(fontSize: 18)),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
+                backgroundColor: const Color.fromARGB(255, 177, 255, 180),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

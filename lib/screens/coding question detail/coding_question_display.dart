@@ -417,22 +417,6 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
                     SizedBox(height: 8),
-                    // DropdownButton<String>(
-                    //   value: _selectedLanguage,
-                    //   onChanged: (String? newValue) {
-                    //     setState(() {
-                    //       _selectedLanguage = newValue;
-                    //       // TODO: Update the syntax highlighting language based on _selectedLanguage
-                    //     });
-                    //   },
-                    //   items: widget.question['allowed_languages']
-                    //       .map<DropdownMenuItem<String>>((String language) {
-                    //     return DropdownMenuItem<String>(
-                    //       value: language,
-                    //       child: Text(language),
-                    //     );
-                    //   }).toList(),
-                    // ),
                     DropdownButton<String>(
                       value: _selectedLanguage,
                       onChanged: (String? newValue) {
@@ -451,7 +435,6 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
                         );
                       }).toList(),
                     ),
-
                     Container(
                       height: MediaQuery.of(context).size.height /
                           2, // Half screen height for code editor

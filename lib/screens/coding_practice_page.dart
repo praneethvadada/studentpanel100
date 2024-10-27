@@ -324,6 +324,30 @@ class _CodingQuestionPageState extends State<CodingQuestionPage> {
     fetchQuestions();
   }
 
+  // Future<void> fetchQuestions() async {
+  //   try {
+  //     final endpoint = '/coding-questions/domain/${widget.domainId}';
+  //     final data = await ApiService.fetchData(endpoint, context);
+
+  //     if (data != null && data.containsKey('codingQuestions')) {
+  //       setState(() {
+  //         _isLoading = false;
+  //         _questions = data['codingQuestions'];
+  //       });
+  //     } else {
+  //       setState(() {
+  //         _errorMessage = 'Unexpected response structure';
+  //         _isLoading = false;
+  //       });
+  //     }
+  //   } catch (error) {
+  //     setState(() {
+  //       _errorMessage = 'An error occurred: $error';
+  //       _isLoading = false;
+  //     });
+  //   }
+  // }
+
   Future<void> fetchQuestions() async {
     try {
       final endpoint = '/coding-questions/domain/${widget.domainId}';
@@ -333,6 +357,11 @@ class _CodingQuestionPageState extends State<CodingQuestionPage> {
         setState(() {
           _isLoading = false;
           _questions = data['codingQuestions'];
+
+          // Check if the list of questions is empty and set a message if so
+          if (_questions.isEmpty) {
+            _errorMessage = 'No coding questions found for this domain.';
+          }
         });
       } else {
         setState(() {
