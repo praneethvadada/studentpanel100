@@ -25,7 +25,9 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
   List<TestCaseResult> testResults = [];
   final ScrollController _rightPanelScrollController = ScrollController();
   String? _selectedLanguage;
-
+  TextEditingController _customInputController =
+      TextEditingController(); // Controller for custom input
+  bool _iscustomInputfieldVisible = false;
   @override
   void initState() {
     super.initState();
@@ -43,10 +45,96 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
   void dispose() {
     _codeController.dispose();
     _focusNode.dispose();
+    _customInputController.dispose();
     super.dispose();
   }
 
-  Future<void> _runCode() async {
+  // Future<void> _runCode() async {
+  //   if (_selectedLanguage == null || _codeController.text.trim().isEmpty) {
+  //     print("No valid code provided or language not selected");
+  //     return;
+  //   }
+
+  //   Uri endpoint;
+  //   switch (_selectedLanguage!.toLowerCase()) {
+  //     case 'python':
+  //       endpoint = Uri.parse('http://localhost:8084/compile');
+  //       break;
+  //     case 'java':
+  //       endpoint = Uri.parse('http://localhost:8083/compile');
+  //       break;
+  //     case 'cpp':
+  //       endpoint = Uri.parse('http://localhost:8081/compile');
+  //       break;
+  //     case 'c':
+  //       endpoint = Uri.parse('http://localhost:8082/compile');
+  //       break;
+  //     default:
+  //       print("Unsupported language selected");
+  //       return;
+  //   }
+
+  //   print('Selected Endpoint URL: $endpoint');
+
+  //   final String code = _codeController.text.trim();
+  //   final List<Map<String, String>> testCases = widget.question['test_cases']
+  //       .map<Map<String, String>>((testCase) => {
+  //             'input': testCase['input'].toString().trim() + '\n',
+  //             'output': testCase['output'].toString().trim() + '\n',
+  //           })
+  //       .toList();
+
+  //   final Map<String, dynamic> requestBody = {
+  //     'language': _selectedLanguage!.toLowerCase(),
+  //     'code': code,
+  //     'testcases': testCases,
+  //   };
+
+  //   print('Request Body: ${jsonEncode(requestBody)}');
+
+  //   try {
+  //     final response = await http.post(
+  //       endpoint,
+  //       headers: {'Content-Type': 'application/json'},
+  //       body: jsonEncode(requestBody),
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       final List<dynamic> responseBody = jsonDecode(response.body);
+  //       setState(() {
+  //         testResults = responseBody.map((result) {
+  //           return TestCaseResult(
+  //             testCase: result['input'],
+  //             expectedResult: result['expected_output'],
+  //             actualResult: result['actual_output'] ?? '',
+  //             passed: result['success'] ?? false,
+  //             errorMessage: result['error'] ?? '',
+  //           );
+  //         }).toList();
+  //       });
+  //       _scrollToResults();
+  //     } else {
+  //       print('Error: ${response.statusCode} - ${response.reasonPhrase}');
+  //       print('Backend Error Response: ${response.body}');
+  //       setState(() {
+  //         testResults = [
+  //           TestCaseResult(
+  //             testCase: '',
+  //             expectedResult: '',
+  //             actualResult: '',
+  //             passed: false,
+  //             errorMessage: jsonDecode(response.body)['error'], // Display error
+  //           ),
+  //         ];
+  //       });
+  //     }
+  //   } catch (error) {
+  //     print('Error sending request: $error');
+  //   }
+  // }
+
+  Future<void> _runCode(
+      {required bool allTestCases, String? customInput}) async {
     if (_selectedLanguage == null || _codeController.text.trim().isEmpty) {
       print("No valid code provided or language not selected");
       return;
@@ -74,12 +162,33 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
     print('Selected Endpoint URL: $endpoint');
 
     final String code = _codeController.text.trim();
-    final List<Map<String, String>> testCases = widget.question['test_cases']
-        .map<Map<String, String>>((testCase) => {
-              'input': testCase['input'].toString().trim() + '\n',
-              'output': testCase['output'].toString().trim() + '\n',
-            })
-        .toList();
+    List<Map<String, String>> testCases;
+
+    // Determine which test cases to send based on the button clicked
+    if (customInput != null) {
+      testCases = [
+        {
+          'input': customInput.trim() + '\n',
+          'output': '', // No expected output for custom input
+        },
+      ];
+    } else if (allTestCases) {
+      testCases = widget.question['test_cases']
+          .map<Map<String, String>>((testCase) => {
+                'input': testCase['input'].toString().trim() + '\n',
+                'output': testCase['output'].toString().trim(),
+              })
+          .toList();
+    } else {
+      // Run only public test cases
+      testCases = widget.question['test_cases']
+          .where((testCase) => testCase['is_public'] == true)
+          .map<Map<String, String>>((testCase) => {
+                'input': testCase['input'].toString().trim() + '\n',
+                'output': testCase['output'].toString().trim(),
+              })
+          .toList();
+    }
 
     final Map<String, dynamic> requestBody = {
       'language': _selectedLanguage!.toLowerCase(),
@@ -102,7 +211,7 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
           testResults = responseBody.map((result) {
             return TestCaseResult(
               testCase: result['input'],
-              expectedResult: result['expected_output'],
+              expectedResult: result['expected_output'] ?? '',
               actualResult: result['actual_output'] ?? '',
               passed: result['success'] ?? false,
               errorMessage: result['error'] ?? '',
@@ -120,7 +229,7 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
               expectedResult: '',
               actualResult: '',
               passed: false,
-              errorMessage: jsonDecode(response.body)['error'], // Display error
+              errorMessage: jsonDecode(response.body)['error'],
             ),
           ];
         });
@@ -151,6 +260,12 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
     );
   }
 
+  void _toggleInputFieldVisibility() {
+    setState(() {
+      _iscustomInputfieldVisible = !_iscustomInputfieldVisible;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -169,28 +284,28 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(widget.question['title'],
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontSize: 24, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 16),
-                    Text("Description",
+                    const SizedBox(height: 16),
+                    const Text("Description",
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
                     Text(widget.question['description'],
                         style: TextStyle(fontSize: 16)),
-                    SizedBox(height: 16),
-                    Text("Input Format",
+                    const SizedBox(height: 16),
+                    const Text("Input Format",
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
                     Text(widget.question['input_format'],
                         style: TextStyle(fontSize: 16)),
                     SizedBox(height: 16),
-                    Text("Output Format",
+                    const Text("Output Format",
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
                     Text(widget.question['output_format'],
                         style: TextStyle(fontSize: 16)),
                     SizedBox(height: 16),
-                    Text("Constraints",
+                    const Text("Constraints",
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
                     Text(widget.question['constraints'],
@@ -291,9 +406,283 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
                       ),
                     ),
                     SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _runCode, // Execute the code when pressed
-                      child: Text('Run Code'),
+                    // ElevatedButton(
+                    //   onPressed: _runCode, // Execute the code when pressed
+                    //   child: Text('Run Code'),
+                    // ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            _runCode(
+                                allTestCases:
+                                    false); // Run only public test cases
+                          },
+                          child: Text('Run'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            _runCode(allTestCases: true); // Run all test cases
+                          },
+                          child: Text('Submit'),
+                        ),
+                        ElevatedButton(
+                          onPressed: _toggleInputFieldVisibility,
+                          child: Text('Custom Input'),
+                        ),
+                        // ElevatedButton(
+                        //   onPressed: () {
+                        //     _runCode(
+                        //         allTestCases: false,
+                        //         customInput: _customInputController
+                        //             .text); // Run custom input
+                        //   },
+                        //   child: Text('Custom Input'),
+                        // ),
+                        // Column(
+                        //   children: [
+                        //     ElevatedButton(
+                        //       onPressed: _toggleInputFieldVisibility,
+                        //       child: Text('Custom Input'),
+                        //     ),
+                        //     AnimatedContainer(
+                        //       duration: Duration(milliseconds: 300),
+                        //       curve: Curves.easeInOut,
+                        //       height: _iscustomInputfieldVisible ? 1000 : 0,
+                        //       child: _iscustomInputfieldVisible
+                        //           ? Column(
+                        //               children: [
+                        //                 TextField(
+                        //                   controller: _customInputController,
+                        //                   decoration: InputDecoration(
+                        //                     hintText: "Enter custom input",
+                        //                     hintStyle: TextStyle(
+                        //                         color: Colors.white54),
+                        //                     filled: true,
+                        //                     fillColor: Colors.black,
+                        //                     border: OutlineInputBorder(),
+                        //                   ),
+                        //                   style: TextStyle(color: Colors.white),
+                        //                   maxLines: 2,
+                        //                 ),
+                        //                 SizedBox(height: 10),
+                        //                 ElevatedButton(
+                        //                   onPressed: () {
+                        //                     _runCode(
+                        //                       allTestCases: false,
+                        //                       customInput:
+                        //                           _customInputController.text,
+                        //                     );
+                        //                   },
+                        //                   child: Text('Run'),
+                        //                 ),
+                        //               ],
+                        //             )
+                        //           : Container(),
+                        //     ),
+                        //   ],
+                        // ),
+
+                        // Padding(
+                        //   padding: const EdgeInsets.all(16.0),
+                        //   child: Column(
+                        //     children: [
+                        //       ElevatedButton(
+                        //         onPressed: _toggleInputFieldVisibility,
+                        //         child: Text('Custom Input'),
+                        //       ),
+                        //       SizedBox(height: 10),
+                        //       Visibility(
+                        //         visible: _iscustomInputfieldVisible,
+                        //         child: Column(
+                        //           children: [
+                        //             TextField(
+                        //               controller: _customInputController,
+                        //               decoration: InputDecoration(
+                        //                 hintText: "Enter custom input",
+                        //                 hintStyle:
+                        //                     TextStyle(color: Colors.white54),
+                        //                 filled: true,
+                        //                 fillColor: Colors.black,
+                        //                 border: OutlineInputBorder(),
+                        //               ),
+                        //               style: TextStyle(color: Colors.white),
+                        //               maxLines: 2,
+                        //             ),
+                        //             SizedBox(height: 10),
+                        //             ElevatedButton(
+                        //               onPressed: () {
+                        //                 _runCode(
+                        //                   allTestCases: false,
+                        //                   customInput:
+                        //                       _customInputController.text,
+                        //                 );
+                        //               },
+                        //               child: Text('Run'),
+                        //             ),
+                        //           ],
+                        //         ),
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ),
+
+                        // Column(
+                        //   children: [
+                        //     ElevatedButton(
+                        //       onPressed: _toggleInputFieldVisibility,
+                        //       child: Text('Custom Input'),
+                        //     ),
+                        //     Visibility(
+                        //       visible: _iscustomInputfieldVisible,
+                        //       child: Padding(
+                        //         padding: const EdgeInsets.only(top: 8.0),
+                        //         child: Column(
+                        //           children: [
+                        //             TextField(
+                        //               controller: _customInputController,
+                        //               decoration: InputDecoration(
+                        //                 hintText: "Enter custom input",
+                        //                 hintStyle:
+                        //                     TextStyle(color: Colors.white54),
+                        //                 filled: true,
+                        //                 fillColor: Colors.black,
+                        //                 border: OutlineInputBorder(),
+                        //               ),
+                        //               style: TextStyle(color: Colors.white),
+                        //               maxLines: 2,
+                        //             ),
+                        //             SizedBox(height: 10),
+                        //             ElevatedButton(
+                        //               onPressed: () {
+                        //                 _runCode(
+                        //                   allTestCases: false,
+                        //                   customInput:
+                        //                       _customInputController.text,
+                        //                 );
+                        //               },
+                        //               child: Text('Run'),
+                        //             ),
+                        //           ],
+                        //         ),
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
+
+                        // AnimatedSize(
+                        //   duration: Duration(milliseconds: 300),
+                        //   curve: Curves.easeInOut,
+                        //   child: _iscustomInputfieldVisible
+                        //       ? Column(
+                        //           children: [
+                        //             TextField(
+                        //               controller: _customInputController,
+                        //               decoration: InputDecoration(
+                        //                 hintText: "Enter custom input",
+                        //                 hintStyle:
+                        //                     TextStyle(color: Colors.white54),
+                        //                 filled: true,
+                        //                 fillColor: Colors.black,
+                        //                 border: OutlineInputBorder(),
+                        //               ),
+                        //               style: TextStyle(color: Colors.white),
+                        //               maxLines: 2,
+                        //             ),
+                        //             SizedBox(height: 10),
+                        //             ElevatedButton(
+                        //               onPressed: () {
+                        //                 _runCode(
+                        //                   allTestCases: false,
+                        //                   customInput:
+                        //                       _customInputController.text,
+                        //                 );
+                        //               },
+                        //               child: Text('Run Custom Input'),
+                        //             ),
+                        //           ],
+                        //         )
+                        //       : SizedBox
+                        //           .shrink(), // Keep the widget height to minimum when collapsed
+                        // ),
+
+                        // AnimatedCrossFade(
+                        //   duration: Duration(milliseconds: 300),
+                        //   firstChild: SizedBox.shrink(),
+                        //   secondChild: Column(
+                        //     children: [
+                        //       Container(
+                        //         height: 50,
+                        //         width: 50,
+                        //         child: TextField(
+                        //           controller: _customInputController,
+                        //           decoration: InputDecoration(
+                        //             hintText: "Enter custom input",
+                        //             hintStyle: TextStyle(color: Colors.white54),
+                        //             filled: true,
+                        //             fillColor: Colors.black,
+                        //             border: OutlineInputBorder(),
+                        //           ),
+                        //           style: TextStyle(color: Colors.white),
+                        //           maxLines: 2,
+                        //         ),
+                        //       ),
+                        //       SizedBox(height: 10),
+                        //       ElevatedButton(
+                        //         onPressed: () {
+                        //           _runCode(
+                        //             allTestCases: false,
+                        //             customInput: _customInputController.text,
+                        //           );
+                        //         },
+                        //         child: Text('Run Custom Input'),
+                        //       ),
+                        //     ],
+                        //   ),
+                        //   crossFadeState: _iscustomInputfieldVisible
+                        //       ? CrossFadeState.showSecond
+                        //       : CrossFadeState.showFirst,
+                        // ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    AnimatedCrossFade(
+                      duration: Duration(milliseconds: 300),
+                      firstChild: SizedBox.shrink(),
+                      secondChild: Column(
+                        children: [
+                          Container(
+                            height: 50,
+                            width: 250,
+                            child: TextField(
+                              controller: _customInputController,
+                              decoration: InputDecoration(
+                                hintText: "Enter custom input",
+                                hintStyle: TextStyle(color: Colors.white54),
+                                filled: true,
+                                fillColor: Colors.black,
+                                border: OutlineInputBorder(),
+                              ),
+                              style: TextStyle(color: Colors.white),
+                              maxLines: 2,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          ElevatedButton(
+                            onPressed: () {
+                              _runCode(
+                                allTestCases: false,
+                                customInput: _customInputController.text,
+                              );
+                            },
+                            child: Text('Run Custom Input'),
+                          ),
+                        ],
+                      ),
+                      crossFadeState: _iscustomInputfieldVisible
+                          ? CrossFadeState.showSecond
+                          : CrossFadeState.showFirst,
                     ),
                     SizedBox(height: 16),
                     if (testResults.isNotEmpty)
@@ -314,16 +703,356 @@ class TestCaseResult {
   final String expectedResult;
   final String actualResult;
   final bool passed;
-  final String errorMessage; // Add errorMessage field
-
+  final String errorMessage;
+  final bool isCustomInput;
   TestCaseResult({
     required this.testCase,
     required this.expectedResult,
     required this.actualResult,
     required this.passed,
-    this.errorMessage = '', // Define errorMessage as an optional parameter
+    this.errorMessage = '',
+    this.isCustomInput = false,
   });
 }
+
+// class TestCaseResultsTable extends StatelessWidget {
+//   final List<TestCaseResult> testResults;
+
+//   TestCaseResultsTable({required this.testResults});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         Text("Test Results",
+//             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+//         Divider(thickness: 2),
+//         Column(
+//           children: testResults.map((result) {
+//             return Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Row(
+//                   children: [
+//                     Expanded(child: Text("Input: ${result.testCase}")),
+//                     Expanded(child: Text("Expected: ${result.expectedResult}")),
+//                     Expanded(child: Text("Actual: ${result.actualResult}")),
+//                     Expanded(
+//                         child: Text(
+//                       result.passed ? "Passed" : "Failed",
+//                       style: TextStyle(
+//                         color: result.passed ? Colors.green : Colors.red,
+//                       ),
+//                     )),
+//                   ],
+//                 ),
+//                 if (!result.passed && result.errorMessage.isNotEmpty)
+//                   Padding(
+//                     padding: const EdgeInsets.only(top: 4.0),
+//                     child: Text(
+//                       "Error: ${result.errorMessage}",
+//                       style: TextStyle(
+//                           color: Colors.red, fontStyle: FontStyle.italic),
+//                     ),
+//                   ),
+//                 Divider(thickness: 1),
+//               ],
+//             );
+//           }).toList(),
+//         ),
+//       ],
+//     );
+//   }
+// }
+
+// class TestCaseResultsTable extends StatelessWidget {
+//   final List<TestCaseResult> testResults;
+
+//   TestCaseResultsTable({required this.testResults});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         Text("Test Results",
+//             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+//         Divider(thickness: 2),
+//         Column(
+//           children: testResults.map((result) {
+//             return Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Row(
+//                   children: [
+//                     Expanded(child: Text("Input: ${result.testCase}")),
+//                     if (!result
+//                         .isCustomInput) // Only show expected for regular test cases
+//                       Expanded(
+//                           child: Text("Expected: ${result.expectedResult}")),
+//                     // Display actual output for all cases, including custom input
+//                     Expanded(child: Text("Output: ${result.actualResult}")),
+//                     if (!result
+//                         .isCustomInput) // Only show pass/fail for regular test cases
+//                       Expanded(
+//                         child: Text(
+//                           result.passed ? "Passed" : "Failed",
+//                           style: TextStyle(
+//                             color: result.passed ? Colors.green : Colors.red,
+//                           ),
+//                         ),
+//                       ),
+//                   ],
+//                 ),
+//                 if (result.isCustomInput && result.errorMessage.isNotEmpty)
+//                   Padding(
+//                     padding: const EdgeInsets.only(top: 4.0),
+//                     child: Text(
+//                       "Error: ${result.errorMessage}",
+//                       style: TextStyle(
+//                           color: Colors.red, fontStyle: FontStyle.italic),
+//                     ),
+//                   ),
+//                 Divider(thickness: 1),
+//               ],
+//             );
+//           }).toList(),
+//         ),
+//       ],
+//     );
+//   }
+// }
+
+// class TestCaseResultsTable extends StatelessWidget {
+//   final List<TestCaseResult> testResults;
+
+//   TestCaseResultsTable({required this.testResults});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         Text("Test Results",
+//             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+//         Divider(thickness: 2),
+//         Column(
+//           children: testResults.map((result) {
+//             return Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Row(
+//                   children: [
+//                     Expanded(child: Text("Input: ${result.testCase}")),
+//                     if (!result
+//                         .isCustomInput) // Only show expected for regular test cases
+//                       Expanded(
+//                           child: Text("Expected: ${result.expectedResult}")),
+//                     // Display actual output for all cases, including custom input
+//                     Expanded(child: Text("Output: ${result.actualResult}")),
+//                     if (!result
+//                         .isCustomInput) // Only show pass/fail for regular test cases
+//                       Expanded(
+//                         child: Text(
+//                           result.passed ? "Passed" : "Failed",
+//                           style: TextStyle(
+//                             color: result.passed ? Colors.green : Colors.red,
+//                           ),
+//                         ),
+//                       ),
+//                   ],
+//                 ),
+//                 if (result.isCustomInput && result.errorMessage.isNotEmpty)
+//                   Padding(
+//                     padding: const EdgeInsets.only(top: 4.0),
+//                     child: Text(
+//                       "Error: ${result.errorMessage}",
+//                       style: TextStyle(
+//                           color: Colors.red, fontStyle: FontStyle.italic),
+//                     ),
+//                   ),
+//                 Divider(thickness: 1),
+//               ],
+//             );
+//           }).toList(),
+//         ),
+//       ],
+//     );
+//   }
+// }
+// class TestCaseResultsTable extends StatelessWidget {
+//   final List<TestCaseResult> testResults;
+
+//   TestCaseResultsTable({required this.testResults});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         Text("Test Results",
+//             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+//         Divider(thickness: 2),
+//         Column(
+//           children: testResults.map((result) {
+//             return Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Row(
+//                   children: [
+//                     Expanded(child: Text("Input: ${result.testCase}")),
+//                     if (!result
+//                         .isCustomInput) // Show expected for regular test cases
+//                       Expanded(
+//                           child: Text("Expected: ${result.expectedResult}")),
+//                     // Display actual output for both custom input and regular test cases
+//                     Expanded(child: Text("Output: ${result.actualResult}")),
+//                     if (!result
+//                         .isCustomInput) // Show pass/fail for regular test cases
+//                       Expanded(
+//                         child: Text(
+//                           result.passed ? "Passed" : "Failed",
+//                           style: TextStyle(
+//                             color: result.passed ? Colors.green : Colors.red,
+//                           ),
+//                         ),
+//                       ),
+//                   ],
+//                 ),
+//                 // Always display the error message if it exists
+//                 if (result.errorMessage.isNotEmpty)
+//                   Padding(
+//                     padding: const EdgeInsets.only(top: 4.0),
+//                     child: Text(
+//                       "Error: ${result.errorMessage}",
+//                       style: TextStyle(
+//                           color: Colors.red, fontStyle: FontStyle.italic),
+//                     ),
+//                   ),
+//                 Divider(thickness: 1),
+//               ],
+//             );
+//           }).toList(),
+//         ),
+//       ],
+//     );
+//   }
+// }
+
+// class TestCaseResultsTable extends StatelessWidget {
+//   final List<TestCaseResult> testResults;
+
+//   TestCaseResultsTable({required this.testResults});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         Text("Test Results",
+//             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+//         Divider(thickness: 2),
+//         Column(
+//           children: testResults.map((result) {
+//             return Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Row(
+//                   children: [
+//                     Expanded(child: Text("Input: ${result.testCase}")),
+//                     // Display actual output for both custom input and regular test cases
+//                     Expanded(child: Text("Output: ${result.actualResult}")),
+//                     // Show expected and pass/fail only for non-custom test cases
+//                     if (!result.isCustomInput)
+//                       Expanded(
+//                           child: Text("Expected: ${result.expectedResult}")),
+//                     if (!result.isCustomInput)
+//                       Expanded(
+//                         child: Text(
+//                           result.passed ? "Passed" : "Failed",
+//                           style: TextStyle(
+//                             color: result.passed ? Colors.green : Colors.red,
+//                           ),
+//                         ),
+//                       ),
+//                   ],
+//                 ),
+//                 // Always display the error message if it exists
+//                 if (result.errorMessage.isNotEmpty)
+//                   Padding(
+//                     padding: const EdgeInsets.only(top: 4.0),
+//                     child: Text(
+//                       "Error: ${result.errorMessage}",
+//                       style: TextStyle(
+//                           color: Colors.red, fontStyle: FontStyle.italic),
+//                     ),
+//                   ),
+//                 Divider(thickness: 1),
+//               ],
+//             );
+//           }).toList(),
+//         ),
+//       ],
+//     );
+//   }
+// }
+// class TestCaseResultsTable extends StatelessWidget {
+//   final List<TestCaseResult> testResults;
+
+//   TestCaseResultsTable({required this.testResults});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         Text("Test Results",
+//             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+//         Divider(thickness: 2),
+//         Column(
+//           children: testResults.map((result) {
+//             return Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Row(
+//                   children: [
+//                     Expanded(child: Text("Input: ${result.testCase}")),
+//                     Expanded(child: Text("Output: ${result.actualResult}")),
+//                     // Show "Expected" and "Pass/Fail" only for non-custom test cases
+//                     if (!result.isCustomInput) ...[
+//                       Expanded(
+//                           child: Text("Expected: ${result.expectedResult}")),
+//                       Expanded(
+//                         child: Text(
+//                           result.passed ? "Passed" : "Failed",
+//                           style: TextStyle(
+//                             color: result.passed ? Colors.green : Colors.red,
+//                           ),
+//                         ),
+//                       ),
+//                     ],
+//                   ],
+//                 ),
+//                 // Always display the error message if it exists
+//                 if (result.errorMessage.isNotEmpty)
+//                   Padding(
+//                     padding: const EdgeInsets.only(top: 4.0),
+//                     child: Text(
+//                       "Error: ${result.errorMessage}",
+//                       style: TextStyle(
+//                           color: Colors.red, fontStyle: FontStyle.italic),
+//                     ),
+//                   ),
+//                 Divider(thickness: 1),
+//               ],
+//             );
+//           }).toList(),
+//         ),
+//       ],
+//     );
+//   }
+// }
 
 class TestCaseResultsTable extends StatelessWidget {
   final List<TestCaseResult> testResults;
@@ -346,18 +1075,31 @@ class TestCaseResultsTable extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(child: Text("Input: ${result.testCase}")),
-                    Expanded(child: Text("Expected: ${result.expectedResult}")),
-                    Expanded(child: Text("Actual: ${result.actualResult}")),
+                    Expanded(child: Text("Output: ${result.actualResult}")),
+                    // Display "-" for "Expected" and "Pass/Fail" in custom inputs
                     Expanded(
-                        child: Text(
-                      result.passed ? "Passed" : "Failed",
-                      style: TextStyle(
-                        color: result.passed ? Colors.green : Colors.red,
+                      child: Text(
+                        result.isCustomInput
+                            ? "-"
+                            : "Expected: ${result.expectedResult}",
                       ),
-                    )),
+                    ),
+                    Expanded(
+                      child: Text(
+                        result.isCustomInput
+                            ? "-"
+                            : (result.passed ? "Passed" : "Failed"),
+                        style: TextStyle(
+                          color: result.isCustomInput
+                              ? Colors.black
+                              : (result.passed ? Colors.green : Colors.red),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-                if (!result.passed && result.errorMessage.isNotEmpty)
+                // Always display the error message if it exists
+                if (result.errorMessage.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 4.0),
                     child: Text(
