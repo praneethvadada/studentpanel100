@@ -24,21 +24,23 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
   final FocusNode _focusNode = FocusNode();
   List<TestCaseResult> testResults = [];
   final ScrollController _rightPanelScrollController = ScrollController();
-  String? _selectedLanguage;
+  String? _selectedLanguage =
+      "Please select a Language"; // Default language prompt
   TextEditingController _customInputController =
       TextEditingController(); // Controller for custom input
   bool _iscustomInputfieldVisible = false;
+
   @override
   void initState() {
     super.initState();
-    _codeController = CodeController(
-      text: '// Start typing your code here...\n',
-      language:
-          dart, // Set this to the appropriate syntax highlighting language
-    );
-    _selectedLanguage = widget.question['allowed_languages'].isNotEmpty
-        ? widget.question['allowed_languages'][0]
-        : null;
+    _codeController = CodeController(text: "Select a Language");
+    // _codeController = CodeController(
+    //   text: '// Start typing your code here...\n',
+    //   language:python, // Set this to the appropriate syntax highlighting language
+    // );
+    // _selectedLanguage = widget.question['allowed_languages'].isNotEmpty
+    //     ? widget.question['allowed_languages'][0]
+    //     : null;
   }
 
   @override
@@ -49,89 +51,32 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
     super.dispose();
   }
 
-  // Future<void> _runCode() async {
-  //   if (_selectedLanguage == null || _codeController.text.trim().isEmpty) {
-  //     print("No valid code provided or language not selected");
-  //     return;
-  //   }
-
-  //   Uri endpoint;
-  //   switch (_selectedLanguage!.toLowerCase()) {
-  //     case 'python':
-  //       endpoint = Uri.parse('http://localhost:8084/compile');
-  //       break;
-  //     case 'java':
-  //       endpoint = Uri.parse('http://localhost:8083/compile');
-  //       break;
-  //     case 'cpp':
-  //       endpoint = Uri.parse('http://localhost:8081/compile');
-  //       break;
-  //     case 'c':
-  //       endpoint = Uri.parse('http://localhost:8082/compile');
-  //       break;
-  //     default:
-  //       print("Unsupported language selected");
-  //       return;
-  //   }
-
-  //   print('Selected Endpoint URL: $endpoint');
-
-  //   final String code = _codeController.text.trim();
-  //   final List<Map<String, String>> testCases = widget.question['test_cases']
-  //       .map<Map<String, String>>((testCase) => {
-  //             'input': testCase['input'].toString().trim() + '\n',
-  //             'output': testCase['output'].toString().trim() + '\n',
-  //           })
-  //       .toList();
-
-  //   final Map<String, dynamic> requestBody = {
-  //     'language': _selectedLanguage!.toLowerCase(),
-  //     'code': code,
-  //     'testcases': testCases,
-  //   };
-
-  //   print('Request Body: ${jsonEncode(requestBody)}');
-
-  //   try {
-  //     final response = await http.post(
-  //       endpoint,
-  //       headers: {'Content-Type': 'application/json'},
-  //       body: jsonEncode(requestBody),
-  //     );
-
-  //     if (response.statusCode == 200) {
-  //       final List<dynamic> responseBody = jsonDecode(response.body);
-  //       setState(() {
-  //         testResults = responseBody.map((result) {
-  //           return TestCaseResult(
-  //             testCase: result['input'],
-  //             expectedResult: result['expected_output'],
-  //             actualResult: result['actual_output'] ?? '',
-  //             passed: result['success'] ?? false,
-  //             errorMessage: result['error'] ?? '',
-  //           );
-  //         }).toList();
-  //       });
-  //       _scrollToResults();
-  //     } else {
-  //       print('Error: ${response.statusCode} - ${response.reasonPhrase}');
-  //       print('Backend Error Response: ${response.body}');
-  //       setState(() {
-  //         testResults = [
-  //           TestCaseResult(
-  //             testCase: '',
-  //             expectedResult: '',
-  //             actualResult: '',
-  //             passed: false,
-  //             errorMessage: jsonDecode(response.body)['error'], // Display error
-  //           ),
-  //         ];
-  //       });
-  //     }
-  //   } catch (error) {
-  //     print('Error sending request: $error');
-  //   }
-  // }
+  void _setStarterCode(String language) {
+    String starterCode;
+    switch (language.toLowerCase()) {
+      case 'python':
+        starterCode = '# Please Start Writing your Code here\n';
+        break;
+      case 'java':
+        starterCode = '''
+public class Main {
+    public static void main(String[] args) {
+        // Please Start Writing your Code from here
+    }
+}
+''';
+        break;
+      case 'c':
+        starterCode = '// Please Start Writing your Code here\n';
+        break;
+      case 'cpp':
+        starterCode = '// Please Start Writing your Code here\n';
+        break;
+      default:
+        starterCode = '// Please Start Writing your Code here\n';
+    }
+    _codeController.text = starterCode;
+  }
 
   Future<void> _runCode(
       {required bool allTestCases, String? customInput}) async {
@@ -366,22 +311,49 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
                     Text("Select Language",
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
+                    // DropdownButton<String>(
+                    //   value: _selectedLanguage,
+                    //   onChanged: (String? newValue) {
+                    //     setState(() {
+                    //       _selectedLanguage = newValue;
+                    //     });
+                    //   },
+                    //   items: (widget.question['allowed_languages']
+                    //           as List<dynamic>)
+                    //       .cast<String>()
+                    //       .map<DropdownMenuItem<String>>((String language) {
+                    //     return DropdownMenuItem<String>(
+                    //       value: language,
+                    //       child: Text(language),
+                    //     );
+                    //   }).toList(),
+                    // ),
+
                     DropdownButton<String>(
                       value: _selectedLanguage,
                       onChanged: (String? newValue) {
-                        setState(() {
-                          _selectedLanguage = newValue;
-                        });
+                        if (newValue != null &&
+                            newValue != "Please select a Language") {
+                          setState(() {
+                            _selectedLanguage = newValue;
+                            _setStarterCode(newValue);
+                          });
+                        }
                       },
-                      items: (widget.question['allowed_languages']
-                              as List<dynamic>)
-                          .cast<String>()
-                          .map<DropdownMenuItem<String>>((String language) {
-                        return DropdownMenuItem<String>(
-                          value: language,
-                          child: Text(language),
-                        );
-                      }).toList(),
+                      items: [
+                        DropdownMenuItem<String>(
+                          value: "Please select a Language",
+                          child: Text("Please select a Language"),
+                        ),
+                        ...widget.question['allowed_languages']
+                            .cast<String>()
+                            .map<DropdownMenuItem<String>>((String language) {
+                          return DropdownMenuItem<String>(
+                            value: language,
+                            child: Text(language),
+                          );
+                        }).toList(),
+                      ],
                     ),
                     Container(
                       height: MediaQuery.of(context).size.height / 2,
@@ -427,219 +399,6 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
                           onPressed: _toggleInputFieldVisibility,
                           child: Text('Custom Input'),
                         ),
-                        // ElevatedButton(
-                        //   onPressed: () {
-                        //     _runCode(
-                        //         allTestCases: false,
-                        //         customInput: _customInputController
-                        //             .text); // Run custom input
-                        //   },
-                        //   child: Text('Custom Input'),
-                        // ),
-                        // Column(
-                        //   children: [
-                        //     ElevatedButton(
-                        //       onPressed: _toggleInputFieldVisibility,
-                        //       child: Text('Custom Input'),
-                        //     ),
-                        //     AnimatedContainer(
-                        //       duration: Duration(milliseconds: 300),
-                        //       curve: Curves.easeInOut,
-                        //       height: _iscustomInputfieldVisible ? 1000 : 0,
-                        //       child: _iscustomInputfieldVisible
-                        //           ? Column(
-                        //               children: [
-                        //                 TextField(
-                        //                   controller: _customInputController,
-                        //                   decoration: InputDecoration(
-                        //                     hintText: "Enter custom input",
-                        //                     hintStyle: TextStyle(
-                        //                         color: Colors.white54),
-                        //                     filled: true,
-                        //                     fillColor: Colors.black,
-                        //                     border: OutlineInputBorder(),
-                        //                   ),
-                        //                   style: TextStyle(color: Colors.white),
-                        //                   maxLines: 2,
-                        //                 ),
-                        //                 SizedBox(height: 10),
-                        //                 ElevatedButton(
-                        //                   onPressed: () {
-                        //                     _runCode(
-                        //                       allTestCases: false,
-                        //                       customInput:
-                        //                           _customInputController.text,
-                        //                     );
-                        //                   },
-                        //                   child: Text('Run'),
-                        //                 ),
-                        //               ],
-                        //             )
-                        //           : Container(),
-                        //     ),
-                        //   ],
-                        // ),
-
-                        // Padding(
-                        //   padding: const EdgeInsets.all(16.0),
-                        //   child: Column(
-                        //     children: [
-                        //       ElevatedButton(
-                        //         onPressed: _toggleInputFieldVisibility,
-                        //         child: Text('Custom Input'),
-                        //       ),
-                        //       SizedBox(height: 10),
-                        //       Visibility(
-                        //         visible: _iscustomInputfieldVisible,
-                        //         child: Column(
-                        //           children: [
-                        //             TextField(
-                        //               controller: _customInputController,
-                        //               decoration: InputDecoration(
-                        //                 hintText: "Enter custom input",
-                        //                 hintStyle:
-                        //                     TextStyle(color: Colors.white54),
-                        //                 filled: true,
-                        //                 fillColor: Colors.black,
-                        //                 border: OutlineInputBorder(),
-                        //               ),
-                        //               style: TextStyle(color: Colors.white),
-                        //               maxLines: 2,
-                        //             ),
-                        //             SizedBox(height: 10),
-                        //             ElevatedButton(
-                        //               onPressed: () {
-                        //                 _runCode(
-                        //                   allTestCases: false,
-                        //                   customInput:
-                        //                       _customInputController.text,
-                        //                 );
-                        //               },
-                        //               child: Text('Run'),
-                        //             ),
-                        //           ],
-                        //         ),
-                        //       ),
-                        //     ],
-                        //   ),
-                        // ),
-
-                        // Column(
-                        //   children: [
-                        //     ElevatedButton(
-                        //       onPressed: _toggleInputFieldVisibility,
-                        //       child: Text('Custom Input'),
-                        //     ),
-                        //     Visibility(
-                        //       visible: _iscustomInputfieldVisible,
-                        //       child: Padding(
-                        //         padding: const EdgeInsets.only(top: 8.0),
-                        //         child: Column(
-                        //           children: [
-                        //             TextField(
-                        //               controller: _customInputController,
-                        //               decoration: InputDecoration(
-                        //                 hintText: "Enter custom input",
-                        //                 hintStyle:
-                        //                     TextStyle(color: Colors.white54),
-                        //                 filled: true,
-                        //                 fillColor: Colors.black,
-                        //                 border: OutlineInputBorder(),
-                        //               ),
-                        //               style: TextStyle(color: Colors.white),
-                        //               maxLines: 2,
-                        //             ),
-                        //             SizedBox(height: 10),
-                        //             ElevatedButton(
-                        //               onPressed: () {
-                        //                 _runCode(
-                        //                   allTestCases: false,
-                        //                   customInput:
-                        //                       _customInputController.text,
-                        //                 );
-                        //               },
-                        //               child: Text('Run'),
-                        //             ),
-                        //           ],
-                        //         ),
-                        //       ),
-                        //     ),
-                        //   ],
-                        // ),
-
-                        // AnimatedSize(
-                        //   duration: Duration(milliseconds: 300),
-                        //   curve: Curves.easeInOut,
-                        //   child: _iscustomInputfieldVisible
-                        //       ? Column(
-                        //           children: [
-                        //             TextField(
-                        //               controller: _customInputController,
-                        //               decoration: InputDecoration(
-                        //                 hintText: "Enter custom input",
-                        //                 hintStyle:
-                        //                     TextStyle(color: Colors.white54),
-                        //                 filled: true,
-                        //                 fillColor: Colors.black,
-                        //                 border: OutlineInputBorder(),
-                        //               ),
-                        //               style: TextStyle(color: Colors.white),
-                        //               maxLines: 2,
-                        //             ),
-                        //             SizedBox(height: 10),
-                        //             ElevatedButton(
-                        //               onPressed: () {
-                        //                 _runCode(
-                        //                   allTestCases: false,
-                        //                   customInput:
-                        //                       _customInputController.text,
-                        //                 );
-                        //               },
-                        //               child: Text('Run Custom Input'),
-                        //             ),
-                        //           ],
-                        //         )
-                        //       : SizedBox
-                        //           .shrink(), // Keep the widget height to minimum when collapsed
-                        // ),
-
-                        // AnimatedCrossFade(
-                        //   duration: Duration(milliseconds: 300),
-                        //   firstChild: SizedBox.shrink(),
-                        //   secondChild: Column(
-                        //     children: [
-                        //       Container(
-                        //         height: 50,
-                        //         width: 50,
-                        //         child: TextField(
-                        //           controller: _customInputController,
-                        //           decoration: InputDecoration(
-                        //             hintText: "Enter custom input",
-                        //             hintStyle: TextStyle(color: Colors.white54),
-                        //             filled: true,
-                        //             fillColor: Colors.black,
-                        //             border: OutlineInputBorder(),
-                        //           ),
-                        //           style: TextStyle(color: Colors.white),
-                        //           maxLines: 2,
-                        //         ),
-                        //       ),
-                        //       SizedBox(height: 10),
-                        //       ElevatedButton(
-                        //         onPressed: () {
-                        //           _runCode(
-                        //             allTestCases: false,
-                        //             customInput: _customInputController.text,
-                        //           );
-                        //         },
-                        //         child: Text('Run Custom Input'),
-                        //       ),
-                        //     ],
-                        //   ),
-                        //   crossFadeState: _iscustomInputfieldVisible
-                        //       ? CrossFadeState.showSecond
-                        //       : CrossFadeState.showFirst,
-                        // ),
                       ],
                     ),
                     SizedBox(height: 16),
@@ -649,9 +408,11 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
                       secondChild: Column(
                         children: [
                           Container(
-                            height: 50,
-                            width: 250,
+                            // height: 250,
+                            width: MediaQuery.of(context).size.width * 0.25,
                             child: TextField(
+                              minLines: 5,
+                              maxLines: 5,
                               controller: _customInputController,
                               decoration: InputDecoration(
                                 hintText: "Enter custom input",
@@ -661,7 +422,6 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
                                 border: OutlineInputBorder(),
                               ),
                               style: TextStyle(color: Colors.white),
-                              maxLines: 2,
                             ),
                           ),
                           SizedBox(height: 10),
@@ -710,345 +470,6 @@ class TestCaseResult {
     this.isCustomInput = false,
   });
 }
-
-// class TestCaseResultsTable extends StatelessWidget {
-//   final List<TestCaseResult> testResults;
-
-//   TestCaseResultsTable({required this.testResults});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         Text("Test Results",
-//             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-//         Divider(thickness: 2),
-//         Column(
-//           children: testResults.map((result) {
-//             return Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Row(
-//                   children: [
-//                     Expanded(child: Text("Input: ${result.testCase}")),
-//                     Expanded(child: Text("Expected: ${result.expectedResult}")),
-//                     Expanded(child: Text("Actual: ${result.actualResult}")),
-//                     Expanded(
-//                         child: Text(
-//                       result.passed ? "Passed" : "Failed",
-//                       style: TextStyle(
-//                         color: result.passed ? Colors.green : Colors.red,
-//                       ),
-//                     )),
-//                   ],
-//                 ),
-//                 if (!result.passed && result.errorMessage.isNotEmpty)
-//                   Padding(
-//                     padding: const EdgeInsets.only(top: 4.0),
-//                     child: Text(
-//                       "Error: ${result.errorMessage}",
-//                       style: TextStyle(
-//                           color: Colors.red, fontStyle: FontStyle.italic),
-//                     ),
-//                   ),
-//                 Divider(thickness: 1),
-//               ],
-//             );
-//           }).toList(),
-//         ),
-//       ],
-//     );
-//   }
-// }
-
-// class TestCaseResultsTable extends StatelessWidget {
-//   final List<TestCaseResult> testResults;
-
-//   TestCaseResultsTable({required this.testResults});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         Text("Test Results",
-//             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-//         Divider(thickness: 2),
-//         Column(
-//           children: testResults.map((result) {
-//             return Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Row(
-//                   children: [
-//                     Expanded(child: Text("Input: ${result.testCase}")),
-//                     if (!result
-//                         .isCustomInput) // Only show expected for regular test cases
-//                       Expanded(
-//                           child: Text("Expected: ${result.expectedResult}")),
-//                     // Display actual output for all cases, including custom input
-//                     Expanded(child: Text("Output: ${result.actualResult}")),
-//                     if (!result
-//                         .isCustomInput) // Only show pass/fail for regular test cases
-//                       Expanded(
-//                         child: Text(
-//                           result.passed ? "Passed" : "Failed",
-//                           style: TextStyle(
-//                             color: result.passed ? Colors.green : Colors.red,
-//                           ),
-//                         ),
-//                       ),
-//                   ],
-//                 ),
-//                 if (result.isCustomInput && result.errorMessage.isNotEmpty)
-//                   Padding(
-//                     padding: const EdgeInsets.only(top: 4.0),
-//                     child: Text(
-//                       "Error: ${result.errorMessage}",
-//                       style: TextStyle(
-//                           color: Colors.red, fontStyle: FontStyle.italic),
-//                     ),
-//                   ),
-//                 Divider(thickness: 1),
-//               ],
-//             );
-//           }).toList(),
-//         ),
-//       ],
-//     );
-//   }
-// }
-
-// class TestCaseResultsTable extends StatelessWidget {
-//   final List<TestCaseResult> testResults;
-
-//   TestCaseResultsTable({required this.testResults});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         Text("Test Results",
-//             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-//         Divider(thickness: 2),
-//         Column(
-//           children: testResults.map((result) {
-//             return Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Row(
-//                   children: [
-//                     Expanded(child: Text("Input: ${result.testCase}")),
-//                     if (!result
-//                         .isCustomInput) // Only show expected for regular test cases
-//                       Expanded(
-//                           child: Text("Expected: ${result.expectedResult}")),
-//                     // Display actual output for all cases, including custom input
-//                     Expanded(child: Text("Output: ${result.actualResult}")),
-//                     if (!result
-//                         .isCustomInput) // Only show pass/fail for regular test cases
-//                       Expanded(
-//                         child: Text(
-//                           result.passed ? "Passed" : "Failed",
-//                           style: TextStyle(
-//                             color: result.passed ? Colors.green : Colors.red,
-//                           ),
-//                         ),
-//                       ),
-//                   ],
-//                 ),
-//                 if (result.isCustomInput && result.errorMessage.isNotEmpty)
-//                   Padding(
-//                     padding: const EdgeInsets.only(top: 4.0),
-//                     child: Text(
-//                       "Error: ${result.errorMessage}",
-//                       style: TextStyle(
-//                           color: Colors.red, fontStyle: FontStyle.italic),
-//                     ),
-//                   ),
-//                 Divider(thickness: 1),
-//               ],
-//             );
-//           }).toList(),
-//         ),
-//       ],
-//     );
-//   }
-// }
-// class TestCaseResultsTable extends StatelessWidget {
-//   final List<TestCaseResult> testResults;
-
-//   TestCaseResultsTable({required this.testResults});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         Text("Test Results",
-//             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-//         Divider(thickness: 2),
-//         Column(
-//           children: testResults.map((result) {
-//             return Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Row(
-//                   children: [
-//                     Expanded(child: Text("Input: ${result.testCase}")),
-//                     if (!result
-//                         .isCustomInput) // Show expected for regular test cases
-//                       Expanded(
-//                           child: Text("Expected: ${result.expectedResult}")),
-//                     // Display actual output for both custom input and regular test cases
-//                     Expanded(child: Text("Output: ${result.actualResult}")),
-//                     if (!result
-//                         .isCustomInput) // Show pass/fail for regular test cases
-//                       Expanded(
-//                         child: Text(
-//                           result.passed ? "Passed" : "Failed",
-//                           style: TextStyle(
-//                             color: result.passed ? Colors.green : Colors.red,
-//                           ),
-//                         ),
-//                       ),
-//                   ],
-//                 ),
-//                 // Always display the error message if it exists
-//                 if (result.errorMessage.isNotEmpty)
-//                   Padding(
-//                     padding: const EdgeInsets.only(top: 4.0),
-//                     child: Text(
-//                       "Error: ${result.errorMessage}",
-//                       style: TextStyle(
-//                           color: Colors.red, fontStyle: FontStyle.italic),
-//                     ),
-//                   ),
-//                 Divider(thickness: 1),
-//               ],
-//             );
-//           }).toList(),
-//         ),
-//       ],
-//     );
-//   }
-// }
-
-// class TestCaseResultsTable extends StatelessWidget {
-//   final List<TestCaseResult> testResults;
-
-//   TestCaseResultsTable({required this.testResults});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         Text("Test Results",
-//             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-//         Divider(thickness: 2),
-//         Column(
-//           children: testResults.map((result) {
-//             return Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Row(
-//                   children: [
-//                     Expanded(child: Text("Input: ${result.testCase}")),
-//                     // Display actual output for both custom input and regular test cases
-//                     Expanded(child: Text("Output: ${result.actualResult}")),
-//                     // Show expected and pass/fail only for non-custom test cases
-//                     if (!result.isCustomInput)
-//                       Expanded(
-//                           child: Text("Expected: ${result.expectedResult}")),
-//                     if (!result.isCustomInput)
-//                       Expanded(
-//                         child: Text(
-//                           result.passed ? "Passed" : "Failed",
-//                           style: TextStyle(
-//                             color: result.passed ? Colors.green : Colors.red,
-//                           ),
-//                         ),
-//                       ),
-//                   ],
-//                 ),
-//                 // Always display the error message if it exists
-//                 if (result.errorMessage.isNotEmpty)
-//                   Padding(
-//                     padding: const EdgeInsets.only(top: 4.0),
-//                     child: Text(
-//                       "Error: ${result.errorMessage}",
-//                       style: TextStyle(
-//                           color: Colors.red, fontStyle: FontStyle.italic),
-//                     ),
-//                   ),
-//                 Divider(thickness: 1),
-//               ],
-//             );
-//           }).toList(),
-//         ),
-//       ],
-//     );
-//   }
-// }
-// class TestCaseResultsTable extends StatelessWidget {
-//   final List<TestCaseResult> testResults;
-
-//   TestCaseResultsTable({required this.testResults});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         Text("Test Results",
-//             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-//         Divider(thickness: 2),
-//         Column(
-//           children: testResults.map((result) {
-//             return Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Row(
-//                   children: [
-//                     Expanded(child: Text("Input: ${result.testCase}")),
-//                     Expanded(child: Text("Output: ${result.actualResult}")),
-//                     // Show "Expected" and "Pass/Fail" only for non-custom test cases
-//                     if (!result.isCustomInput) ...[
-//                       Expanded(
-//                           child: Text("Expected: ${result.expectedResult}")),
-//                       Expanded(
-//                         child: Text(
-//                           result.passed ? "Passed" : "Failed",
-//                           style: TextStyle(
-//                             color: result.passed ? Colors.green : Colors.red,
-//                           ),
-//                         ),
-//                       ),
-//                     ],
-//                   ],
-//                 ),
-//                 // Always display the error message if it exists
-//                 if (result.errorMessage.isNotEmpty)
-//                   Padding(
-//                     padding: const EdgeInsets.only(top: 4.0),
-//                     child: Text(
-//                       "Error: ${result.errorMessage}",
-//                       style: TextStyle(
-//                           color: Colors.red, fontStyle: FontStyle.italic),
-//                     ),
-//                   ),
-//                 Divider(thickness: 1),
-//               ],
-//             );
-//           }).toList(),
-//         ),
-//       ],
-//     );
-//   }
-// }
 
 class TestCaseResultsTable extends StatelessWidget {
   final List<TestCaseResult> testResults;
