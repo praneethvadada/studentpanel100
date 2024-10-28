@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // For clipboard and key handling
+import 'package:studentpanel100/package%20for%20code%20editor/code_field/clipboard_manager.dart';
 import 'package:studentpanel100/package%20for%20code%20editor/code_field/linked_scroll_controller.dart';
 import '../code_theme/code_theme.dart';
 import '../line_numbers/line_number_controller.dart';
@@ -71,25 +72,10 @@ class _CodeFieldState extends State<CodeField> {
   ScrollController? _codeScroll;
   LineNumberController? _numberController;
   FocusNode? _focusNode;
-  String _internalClipboard = '';
+  final ClipboardManager _clipboardManager = ClipboardManager();
+  ScrollController _horizontalScrollController =
+      ScrollController(); // Initialize here
 
-  // Define the longestLine variable
-  String longestLine = '';
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _controllers = LinkedScrollControllerGroup();
-  //   _numberScroll = _controllers?.addAndGet();
-  //   _codeScroll = _controllers?.addAndGet();
-  //   _numberController = LineNumberController(widget.lineNumberBuilder);
-  //   widget.controller.addListener(_onTextChanged);
-  //   _focusNode = widget.focusNode ?? FocusNode();
-  //   _focusNode!.onKey = _onKey;
-  //   _focusNode!.attach(context, onKey: _onKey);
-
-  //   _onTextChanged(); // Initial call to populate line numbers
-  // }
   @override
   void initState() {
     super.initState();
@@ -101,63 +87,21 @@ class _CodeFieldState extends State<CodeField> {
     _focusNode = widget.focusNode ?? FocusNode();
     _focusNode!.onKey = _onKey;
     _focusNode!.attach(context, onKey: _onKey);
+    _horizontalScrollController = ScrollController();
 
     _onTextChanged(); // Initial call to populate line numbers
   }
 
-// Override keyboard key events to handle Tab key, Enter key, and block copy/paste/cut
-  // KeyEventResult _onKey(FocusNode node, RawKeyEvent event) {
-  //   if (widget.readOnly) {
-  //     return KeyEventResult.ignored;
-  //   }
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onTextChanged);
+    _numberScroll?.dispose();
+    _codeScroll?.dispose();
+    _numberController?.dispose();
+    _horizontalScrollController.dispose();
 
-  //   if (event is RawKeyDownEvent) {
-  //     // Intercept opening braces or quotes to auto-insert matching closing characters
-  //     if (event.logicalKey == LogicalKeyboardKey.bracketLeft ||
-  //         event.logicalKey == LogicalKeyboardKey.braceLeft ||
-  //         event.logicalKey == LogicalKeyboardKey.parenthesisLeft ||
-  //         event.character == '"' ||
-  //         event.character == "'") {
-  //       // Check for typed quotes directly
-  //       _handleBraceOrQuoteInsertion(event.character!);
-  //       return KeyEventResult.handled;
-  //     }
-
-  //     // Intercept Enter key to handle indentation inside braces
-  //     if (event.logicalKey == LogicalKeyboardKey.enter) {
-  //       _handleEnterKey();
-  //       return KeyEventResult.handled;
-  //     }
-
-  //     // Intercept the Tab key press to insert custom spaces for indentation
-  //     if (event.logicalKey == LogicalKeyboardKey.tab) {
-  //       _handleTabKey();
-  //       return KeyEventResult.handled;
-  //     }
-
-  //     // Intercept Ctrl + C (Copy)
-  //     if (event.isControlPressed &&
-  //         event.logicalKey == LogicalKeyboardKey.keyC) {
-  //       return KeyEventResult.handled; // Block copy operation
-  //     }
-
-  //     // Intercept Ctrl + X (Cut)
-  //     if (event.isControlPressed &&
-  //         event.logicalKey == LogicalKeyboardKey.keyX) {
-  //       return KeyEventResult.handled; // Block cut operation
-  //     }
-
-  //     // Intercept Ctrl + V (Paste)
-  //     if (event.isControlPressed &&
-  //         event.logicalKey == LogicalKeyboardKey.keyV) {
-  //       Clipboard.setData(ClipboardData(text: '')); // Block paste operation
-  //       return KeyEventResult.handled;
-  //     }
-  //   }
-
-  //   // Let the controller handle other key events
-  //   return widget.controller.onKey(event);
-  // }
+    super.dispose();
+  }
 
   KeyEventResult _onKey(FocusNode node, RawKeyEvent event) {
     if (widget.readOnly) {
@@ -165,12 +109,19 @@ class _CodeFieldState extends State<CodeField> {
     }
 
     if (event is RawKeyDownEvent) {
+      // Intercept Ctrl+H to display clipboard history
+      if (event.isControlPressed &&
+          event.logicalKey == LogicalKeyboardKey.keyH) {
+        _showClipboardHistory();
+        return KeyEventResult.handled;
+      }
       // Intercept opening braces or quotes to auto-insert matching closing characters
       if (event.logicalKey == LogicalKeyboardKey.bracketLeft ||
           event.logicalKey == LogicalKeyboardKey.braceLeft ||
           event.logicalKey == LogicalKeyboardKey.parenthesisLeft ||
           event.character == '"' ||
           event.character == "'") {
+        // Check for typed quotes directly
         _handleBraceOrQuoteInsertion(event.character!);
         return KeyEventResult.handled;
       }
@@ -186,20 +137,16 @@ class _CodeFieldState extends State<CodeField> {
         _handleTabKey();
         return KeyEventResult.handled;
       }
-
-      // Handle Ctrl+C (Copy), Ctrl+X (Cut), and Ctrl+V (Paste) using internal storage
       if (event.isControlPressed) {
         if (event.logicalKey == LogicalKeyboardKey.keyC) {
-          // Copy selected text to internal clipboard
-          _internalClipboard =
-              widget.controller.selection.textInside(widget.controller.text);
+          _clipboardManager.addToClipboard(
+              widget.controller.selection.textInside(widget.controller.text));
           return KeyEventResult.handled;
         }
 
         if (event.logicalKey == LogicalKeyboardKey.keyX) {
-          // Cut selected text to internal clipboard and remove it from the text
-          _internalClipboard =
-              widget.controller.selection.textInside(widget.controller.text);
+          _clipboardManager.addToClipboard(
+              widget.controller.selection.textInside(widget.controller.text));
           widget.controller.text = widget.controller.text.replaceRange(
             widget.controller.selection.start,
             widget.controller.selection.end,
@@ -209,8 +156,7 @@ class _CodeFieldState extends State<CodeField> {
         }
 
         if (event.logicalKey == LogicalKeyboardKey.keyV) {
-          // Paste text from internal clipboard at the current cursor position
-          final pasteText = _internalClipboard;
+          final pasteText = _clipboardManager.internalClipboard;
           final updatedText = widget.controller.text.replaceRange(
             widget.controller.selection.start,
             widget.controller.selection.end,
@@ -229,6 +175,85 @@ class _CodeFieldState extends State<CodeField> {
 
     // Let the controller handle other key events
     return widget.controller.onKey(event);
+  }
+
+  void _showClipboardHistory() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: const Text('Clipboard History'),
+              content: SizedBox(
+                width: double.maxFinite,
+                height: 400,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: _clipboardManager.clipboardHistory
+                        .asMap()
+                        .entries
+                        .map((entry) => Container(
+                              color: entry.key % 2 == 0
+                                  ? Colors.grey[200]
+                                  : Colors.white,
+                              child: ListTile(
+                                title: Text(
+                                  entry.value,
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                trailing: IconButton(
+                                  icon: Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () {
+                                    setState(() {
+                                      _clipboardManager
+                                          .deleteFromClipboardHistory(
+                                              entry.key);
+                                    });
+                                  },
+                                ),
+                                onTap: () {
+                                  _clipboardManager.addToClipboard(entry.value);
+                                  _pasteFromInternalClipboard();
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ))
+                        .toList(),
+                  ),
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Close'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _pasteFromInternalClipboard() {
+    final pasteText = _clipboardManager.internalClipboard;
+    final cursorPosition = widget.controller.selection.start;
+    final updatedText = widget.controller.text.replaceRange(
+      cursorPosition,
+      cursorPosition,
+      pasteText,
+    );
+    widget.controller.value = TextEditingValue(
+      text: updatedText,
+      selection: TextSelection.collapsed(
+        offset: cursorPosition + pasteText.length,
+      ),
+    );
   }
 
 // Handle the insertion of braces and quotes with matching pairs
@@ -355,15 +380,6 @@ class _CodeFieldState extends State<CodeField> {
     });
   }
 
-  @override
-  void dispose() {
-    widget.controller.removeListener(_onTextChanged);
-    _numberScroll?.dispose();
-    _codeScroll?.dispose();
-    _numberController?.dispose();
-    super.dispose();
-  }
-
   void _onTextChanged() {
     // Rebuild line number
     final str = widget.controller.text.split('\n');
@@ -374,25 +390,17 @@ class _CodeFieldState extends State<CodeField> {
     }
 
     _numberController?.text = buf.join('\n');
-
-    // Find longest line
-    longestLine = '';
-    for (var line in widget.controller.text.split('\n')) {
-      if (line.length > longestLine.length) {
-        longestLine = line;
-      }
-    }
-
     setState(() {});
   }
 
-  // Define the _wrapInScrollView method to handle horizontal scrolling
   Widget _wrapInScrollView(
     Widget codeField,
     TextStyle textStyle,
     double minWidth,
   ) {
     final leftPad = widget.lineNumberStyle.margin / 2;
+
+    // Using IntrinsicWidth to maintain structure and layout consistency
     final intrinsic = IntrinsicWidth(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -405,25 +413,36 @@ class _CodeFieldState extends State<CodeField> {
             ),
             child: Padding(
               padding: const EdgeInsets.only(right: 16),
-              child: Text(longestLine, style: textStyle),
-            ), // Add extra padding
+              child: Text(
+                _clipboardManager
+                    .internalClipboard, // Displaying clipboard content
+                style: textStyle,
+              ),
+            ),
           ),
           widget.expands ? Expanded(child: codeField) : codeField,
         ],
       ),
     );
 
-    return SingleChildScrollView(
-      padding: EdgeInsets.only(
-        left: leftPad,
-        right: widget.padding.right,
-      ),
-      scrollDirection: Axis.horizontal,
+    // SingleChildScrollView to enable horizontal scrolling while keeping all existing constraints
+    return Scrollbar(
+      thumbVisibility: true, // Keeps scrollbar visible
+      controller: _horizontalScrollController, // Attach the controller
 
-      /// Prevents the horizontal scroll if horizontalScroll is false
-      physics:
-          widget.horizontalScroll ? null : const NeverScrollableScrollPhysics(),
-      child: intrinsic,
+      child: SingleChildScrollView(
+        controller: _horizontalScrollController,
+        // scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.only(
+          left: leftPad,
+          right: widget.padding.right,
+        ),
+        scrollDirection: Axis.horizontal,
+        physics: widget.horizontalScroll
+            ? const AlwaysScrollableScrollPhysics()
+            : const NeverScrollableScrollPhysics(),
+        child: intrinsic,
+      ),
     );
   }
 
@@ -510,9 +529,16 @@ class _CodeFieldState extends State<CodeField> {
         controller: widget.controller,
         minLines: widget.minLines,
         selectionControls: widget.selectionControls,
-        maxLines: widget.maxLines,
+        // maxLines: widget.maxLines,
+        maxLines: null, // Allow unlimited lines to wrap content to new lines
+
         expands: widget.expands,
         scrollController: _codeScroll,
+        // scrollPhysics:
+        //     const ClampingScrollPhysics(), // Limit to horizontal scroll
+        scrollPhysics:
+            const AlwaysScrollableScrollPhysics(), // Ensures scrollable behavior
+
         decoration: InputDecoration(
           disabledBorder: InputBorder.none,
           border: InputBorder.none,

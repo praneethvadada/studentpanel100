@@ -406,10 +406,6 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
                       ),
                     ),
                     SizedBox(height: 16),
-                    // ElevatedButton(
-                    //   onPressed: _runCode, // Execute the code when pressed
-                    //   child: Text('Run Code'),
-                    // ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
