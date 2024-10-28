@@ -33,14 +33,11 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
   @override
   void initState() {
     super.initState();
-    _codeController = CodeController(text: "Select a Language");
-    // _codeController = CodeController(
-    //   text: '// Start typing your code here...\n',
-    //   language:python, // Set this to the appropriate syntax highlighting language
-    // );
-    // _selectedLanguage = widget.question['allowed_languages'].isNotEmpty
-    //     ? widget.question['allowed_languages'][0]
-    //     : null;
+    _codeController = CodeController(text: '''
+***************************************************
+***************  Select a Language  ***************
+***************************************************
+''');
   }
 
   @override
@@ -311,22 +308,32 @@ public class Main {
                     Text("Select Language",
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
+
                     // DropdownButton<String>(
                     //   value: _selectedLanguage,
                     //   onChanged: (String? newValue) {
-                    //     setState(() {
-                    //       _selectedLanguage = newValue;
-                    //     });
+                    //     if (newValue != null &&
+                    //         newValue != "Please select a Language") {
+                    //       setState(() {
+                    //         _selectedLanguage = newValue;
+                    //         _setStarterCode(newValue);
+                    //       });
+                    //     }
                     //   },
-                    //   items: (widget.question['allowed_languages']
-                    //           as List<dynamic>)
-                    //       .cast<String>()
-                    //       .map<DropdownMenuItem<String>>((String language) {
-                    //     return DropdownMenuItem<String>(
-                    //       value: language,
-                    //       child: Text(language),
-                    //     );
-                    //   }).toList(),
+                    //   items: [
+                    //     DropdownMenuItem<String>(
+                    //       value: "Please select a Language",
+                    //       child: Text("Please select a Language"),
+                    //     ),
+                    //     ...widget.question['allowed_languages']
+                    //         .cast<String>()
+                    //         .map<DropdownMenuItem<String>>((String language) {
+                    //       return DropdownMenuItem<String>(
+                    //         value: language,
+                    //         child: Text(language),
+                    //       );
+                    //     }).toList(),
+                    //   ],
                     // ),
 
                     DropdownButton<String>(
@@ -334,10 +341,46 @@ public class Main {
                       onChanged: (String? newValue) {
                         if (newValue != null &&
                             newValue != "Please select a Language") {
-                          setState(() {
-                            _selectedLanguage = newValue;
-                            _setStarterCode(newValue);
-                          });
+                          if (_selectedLanguage != "Please select a Language") {
+                            // Show alert if a language was previously selected
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text("Change Language"),
+                                  content: Text(
+                                      "Changing the language will remove the current code. Do you want to proceed?"),
+                                  actions: [
+                                    TextButton(
+                                      child: Text("Cancel"),
+                                      onPressed: () {
+                                        Navigator.of(context)
+                                            .pop(); // Close the dialog
+                                      },
+                                    ),
+                                    TextButton(
+                                      child: Text("Proceed"),
+                                      onPressed: () {
+                                        // Proceed with changing the language and setting starter code
+                                        setState(() {
+                                          _selectedLanguage = newValue;
+                                          _setStarterCode(newValue);
+                                        });
+                                        Navigator.of(context)
+                                            .pop(); // Close the dialog
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          } else {
+                            // Directly set language and starter code if no language was selected previously
+                            setState(() {
+                              _selectedLanguage = newValue;
+                              _setStarterCode(newValue);
+                            });
+                          }
                         }
                       },
                       items: [
@@ -355,6 +398,7 @@ public class Main {
                         }).toList(),
                       ],
                     ),
+
                     Container(
                       height: MediaQuery.of(context).size.height / 2,
                       child: CodeField(
