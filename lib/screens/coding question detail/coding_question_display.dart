@@ -171,9 +171,373 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
   //   }
   // }
 
+  // Future<void> _runCode() async {
+  //   if (_selectedLanguage == null) {
+  //     print("No language selected");
+  //     return;
+  //   }
+
+  //   Uri endpoint;
+  //   switch (_selectedLanguage!.toLowerCase()) {
+  //     case 'python':
+  //       endpoint = Uri.parse('http://localhost:8084/compile');
+  //       break;
+  //     case 'java':
+  //       endpoint = Uri.parse('http://localhost:8083/compile');
+  //       break;
+  //     case 'cpp':
+  //       endpoint = Uri.parse('http://localhost:8081/compile');
+  //       break;
+  //     case 'c':
+  //       endpoint = Uri.parse('http://localhost:8082/compile');
+  //       break;
+  //     default:
+  //       print("Unsupported language selected");
+  //       return;
+  //   }
+
+  //   print('Selected Endpoint URL: $endpoint');
+
+  //   final String code = _codeController.text.trim();
+  //   final List<Map<String, String>> testCases = widget.question['test_cases']
+  //       .map<Map<String, String>>((testCase) => {
+  //             'input': testCase['input'].toString().trim() +
+  //                 '\n', // Ensure newline in input
+  //             'output': testCase['output'].toString().trim() +
+  //                 '\n', // Ensure newline in output
+  //           })
+  //       .toList();
+
+  //   // Correct JSON request body with formatted newline characters
+  //   final Map<String, dynamic> requestBody = {
+  //     'language': _selectedLanguage!.toLowerCase(),
+  //     'code': code,
+  //     'testcases': testCases,
+  //   };
+
+  //   print('Request Body: ${jsonEncode(requestBody)}'); // Debugging purpose
+
+  //   try {
+  //     // Use the selected endpoint instead of a hardcoded URL
+  //     final response = await http.post(
+  //       endpoint,
+  //       headers: {'Content-Type': 'application/json'},
+  //       body: jsonEncode(requestBody),
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       print('Response: ${response.body}');
+  //       final List<dynamic> responseBody = jsonDecode(response.body);
+  //       setState(() {
+  //         testResults = responseBody.map((result) {
+  //           return TestCaseResult(
+  //             testCase: result['input'],
+  //             expectedResult: result['expected_output'],
+  //             actualResult: result['actual_output'],
+  //             passed: result['success'],
+  //           );
+  //         }).toList();
+  //       });
+  //       _scrollToResults();
+  //     } else {
+  //       print('Error: ${response.statusCode} - ${response.reasonPhrase}');
+  //     }
+  //   } catch (error) {
+  //     print('Error sending request: $error');
+  //   }
+  // }
+
+  // Future<void> _runCode() async {
+  //   Uri endpoint;
+  //   switch (_selectedLanguage!.toLowerCase()) {
+  //     case 'python':
+  //       endpoint = Uri.parse('http://localhost:8084/compile');
+  //       break;
+  //     case 'java':
+  //       endpoint = Uri.parse('http://localhost:8083/compile');
+  //       break;
+  //     case 'cpp':
+  //       endpoint = Uri.parse('http://localhost:8081/compile');
+  //       break;
+  //     case 'c':
+  //       endpoint = Uri.parse('http://localhost:8082/compile');
+  //       break;
+  //     default:
+  //       print("Unsupported language selected");
+  //       return;
+  //   }
+  //   print('Selected Endpoint URL: $endpoint');
+
+  //   final String code = _codeController.text.trim();
+  //   final List<Map<String, String>> testCases = widget.question['test_cases']
+  //       .map<Map<String, String>>((testCase) => {
+  //             'input': testCase['input'].toString().trim() + '\n',
+  //             'output': testCase['output'].toString().trim() + '\n',
+  //           })
+  //       .toList();
+
+  //   final Map<String, dynamic> requestBody = {
+  //     'language': _selectedLanguage!.toLowerCase(),
+  //     'code': code,
+  //     'testcases': testCases,
+  //   };
+
+  //   print('Request Body: ${jsonEncode(requestBody)}');
+
+  //   try {
+  //     final response = await http.post(
+  //       endpoint,
+  //       headers: {'Content-Type': 'application/json'},
+  //       body: jsonEncode(requestBody),
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       print('Response: ${response.body}');
+  //       final List<dynamic> responseBody = jsonDecode(response.body);
+  //       setState(() {
+  //         testResults = responseBody.map((result) {
+  //           final bool isSuccess = result['success'];
+  //           return TestCaseResult(
+  //             testCase: result['input'],
+  //             expectedResult: result['expected_output'],
+  //             actualResult: result['actual_output'],
+  //             passed: isSuccess,
+  //             // errorMessage: isSuccess
+  //             errorMessage: result['error'] // Add error message if present
+
+  //                 ? null
+  //                 : 'Expected: ${result['expected_output']}\nGot: ${result['actual_output']}', // Customize error message
+  //           );
+  //         }).toList();
+  //       });
+  //       _scrollToResults();
+  //     } else {
+  //       print('Error: ${response.statusCode} - ${response.reasonPhrase}');
+  //     }
+  //   } catch (error) {
+  //     print('Error sending request: $error');
+  //   }
+  // }
+
+  // Future<void> _runCode() async {
+  //   Uri endpoint;
+  //   switch (_selectedLanguage!.toLowerCase()) {
+  //     case 'python':
+  //       endpoint = Uri.parse('http://localhost:8084/compile');
+  //       break;
+  //     case 'java':
+  //       endpoint = Uri.parse('http://localhost:8083/compile');
+  //       break;
+  //     case 'cpp':
+  //       endpoint = Uri.parse('http://localhost:8081/compile');
+  //       break;
+  //     case 'c':
+  //       endpoint = Uri.parse('http://localhost:8082/compile');
+  //       break;
+  //     default:
+  //       print("Unsupported language selected");
+  //       return;
+  //   }
+  //   print('Selected Endpoint URL: $endpoint');
+
+  //   final String code = _codeController.text.trim();
+  //   final List<Map<String, String>> testCases = widget.question['test_cases']
+  //       .map<Map<String, String>>((testCase) => {
+  //             'input': testCase['input'].toString().trim() + '\n',
+  //             'output': testCase['output'].toString().trim() + '\n',
+  //           })
+  //       .toList();
+
+  //   final Map<String, dynamic> requestBody = {
+  //     'language': _selectedLanguage!.toLowerCase(),
+  //     'code': code,
+  //     'testcases': testCases,
+  //   };
+
+  //   print('Request Body: ${jsonEncode(requestBody)}');
+
+  //   try {
+  //     final response = await http.post(
+  //       endpoint,
+  //       headers: {'Content-Type': 'application/json'},
+  //       body: jsonEncode(requestBody),
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       print('Response: ${response.body}');
+  //       final List<dynamic> responseBody = jsonDecode(response.body);
+  //       setState(() {
+  //         testResults = responseBody.map((result) {
+  //           final bool isSuccess =
+  //               result['success'] ?? false; // Default to false if null
+  //           final String? error = result['error']; // Can be null if no error
+
+  //           return TestCaseResult(
+  //             testCase: result['input'],
+  //             expectedResult: result['expected_output'],
+  //             actualResult: result['actual_output'] ?? '',
+  //             passed: isSuccess,
+  //             errorMessage: error,
+  //           );
+  //         }).toList();
+  //       });
+  //       _scrollToResults();
+  //     } else {
+  //       print('Error: ${response.statusCode} - ${response.reasonPhrase}');
+  //     }
+  //   } catch (error) {
+  //     print('Error sending request: $error');
+  //   }
+  // }
+
+  // Future<void> _runCode() async {
+  //   Uri endpoint;
+  //   switch (_selectedLanguage!.toLowerCase()) {
+  //     case 'python':
+  //       endpoint = Uri.parse('http://localhost:8084/compile');
+  //       break;
+  //     case 'java':
+  //       endpoint = Uri.parse('http://localhost:8083/compile');
+  //       break;
+  //     case 'cpp':
+  //       endpoint = Uri.parse('http://localhost:8081/compile');
+  //       break;
+  //     case 'c':
+  //       endpoint = Uri.parse('http://localhost:8082/compile');
+  //       break;
+  //     default:
+  //       print("Unsupported language selected");
+  //       return;
+  //   }
+  //   print('Selected Endpoint URL: $endpoint');
+
+  //   final String code = _codeController.text.trim();
+  //   final List<Map<String, String>> testCases = widget.question['test_cases']
+  //       .map<Map<String, String>>((testCase) => {
+  //             'input': testCase['input'].toString().trim() + '\n',
+  //             'output': testCase['output'].toString().trim() + '\n',
+  //           })
+  //       .toList();
+
+  //   final Map<String, dynamic> requestBody = {
+  //     'language': _selectedLanguage!.toLowerCase(),
+  //     'code': code,
+  //     'testcases': testCases,
+  //   };
+
+  //   print('Request Body: ${jsonEncode(requestBody)}');
+
+  //   try {
+  //     final response = await http.post(
+  //       endpoint,
+  //       headers: {'Content-Type': 'application/json'},
+  //       body: jsonEncode(requestBody),
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       print('Response: ${response.body}');
+  //       final List<dynamic> responseBody = jsonDecode(response.body);
+  //       setState(() {
+  //         testResults = responseBody.map((result) {
+  //           final bool isSuccess = result['success'] ?? false;
+  //           final String? error = result['error'];
+
+  //           return TestCaseResult(
+  //             testCase: result['input'],
+  //             expectedResult: result['expected_output'],
+  //             actualResult: result['actual_output'] ?? '',
+  //             passed: isSuccess,
+  //             errorMessage: error, // Capture error message
+  //           );
+  //         }).toList();
+  //       });
+  //       _scrollToResults();
+  //     } else {
+  //       print('Error: ${response.statusCode} - ${response.reasonPhrase}');
+  //       print('Backend Error Response: ${response.body}');
+  //     }
+  //   } catch (error) {
+  //     print('Error sending request: $error');
+  //   }
+  // }
+
+  // Future<void> _runCode() async {
+  //   if (_selectedLanguage == null || _codeController.text.trim().isEmpty) {
+  //     print("No valid code provided or language not selected");
+  //     return;
+  //   }
+
+  //   Uri endpoint;
+  //   switch (_selectedLanguage!.toLowerCase()) {
+  //     case 'python':
+  //       endpoint = Uri.parse('http://localhost:8084/compile');
+  //       break;
+  //     case 'java':
+  //       endpoint = Uri.parse('http://localhost:8083/compile');
+  //       break;
+  //     case 'cpp':
+  //       endpoint = Uri.parse('http://localhost:8081/compile');
+  //       break;
+  //     case 'c':
+  //       endpoint = Uri.parse('http://localhost:8082/compile');
+  //       break;
+  //     default:
+  //       print("Unsupported language selected");
+  //       return;
+  //   }
+
+  //   print('Selected Endpoint URL: $endpoint');
+
+  //   final String code = _codeController.text.trim();
+  //   final List<Map<String, String>> testCases = widget.question['test_cases']
+  //       .map<Map<String, String>>((testCase) => {
+  //             'input': testCase['input'].toString().trim() + '\n',
+  //             'output': testCase['output'].toString().trim() + '\n',
+  //           })
+  //       .toList();
+
+  //   final Map<String, dynamic> requestBody = {
+  //     'language': _selectedLanguage!.toLowerCase(),
+  //     'code': code,
+  //     'testcases': testCases,
+  //   };
+
+  //   print('Request Body: ${jsonEncode(requestBody)}');
+
+  //   try {
+  //     final response = await http.post(
+  //       endpoint,
+  //       headers: {'Content-Type': 'application/json'},
+  //       body: jsonEncode(requestBody),
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       final List<dynamic> responseBody = jsonDecode(response.body);
+  //       setState(() {
+  //         testResults = responseBody.map((result) {
+  //           return TestCaseResult(
+  //             testCase: result['input'],
+  //             expectedResult: result['expected_output'],
+  //             actualResult: result['actual_output'] ?? '',
+  //             passed: result['success'] ?? false,
+  //             errorMessage:
+  //                 result['error'] ?? '', // Store error message if present
+  //           );
+  //         }).toList();
+  //       });
+  //       _scrollToResults();
+  //     } else {
+  //       print('Error: ${response.statusCode} - ${response.reasonPhrase}');
+  //       print('Backend Error Response: ${response.body}');
+  //     }
+  //   } catch (error) {
+  //     print('Error sending request: $error');
+  //   }
+  // }
+
   Future<void> _runCode() async {
-    if (_selectedLanguage == null) {
-      print("No language selected");
+    if (_selectedLanguage == null || _codeController.text.trim().isEmpty) {
+      print("No valid code provided or language not selected");
       return;
     }
 
@@ -201,24 +565,20 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
     final String code = _codeController.text.trim();
     final List<Map<String, String>> testCases = widget.question['test_cases']
         .map<Map<String, String>>((testCase) => {
-              'input': testCase['input'].toString().trim() +
-                  '\n', // Ensure newline in input
-              'output': testCase['output'].toString().trim() +
-                  '\n', // Ensure newline in output
+              'input': testCase['input'].toString().trim() + '\n',
+              'output': testCase['output'].toString().trim() + '\n',
             })
         .toList();
 
-    // Correct JSON request body with formatted newline characters
     final Map<String, dynamic> requestBody = {
       'language': _selectedLanguage!.toLowerCase(),
       'code': code,
       'testcases': testCases,
     };
 
-    print('Request Body: ${jsonEncode(requestBody)}'); // Debugging purpose
+    print('Request Body: ${jsonEncode(requestBody)}');
 
     try {
-      // Use the selected endpoint instead of a hardcoded URL
       final response = await http.post(
         endpoint,
         headers: {'Content-Type': 'application/json'},
@@ -226,21 +586,34 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
       );
 
       if (response.statusCode == 200) {
-        print('Response: ${response.body}');
         final List<dynamic> responseBody = jsonDecode(response.body);
         setState(() {
           testResults = responseBody.map((result) {
             return TestCaseResult(
               testCase: result['input'],
               expectedResult: result['expected_output'],
-              actualResult: result['actual_output'],
-              passed: result['success'],
+              actualResult: result['actual_output'] ?? '',
+              passed: result['success'] ?? false,
+              errorMessage: result['error'] ?? '', // Capture error if present
             );
           }).toList();
         });
         _scrollToResults();
       } else {
         print('Error: ${response.statusCode} - ${response.reasonPhrase}');
+        print('Backend Error Response: ${response.body}');
+        // Handle backend error for 400 or other status codes
+        setState(() {
+          testResults = [
+            TestCaseResult(
+              testCase: '',
+              expectedResult: '',
+              actualResult: '',
+              passed: false,
+              errorMessage: jsonDecode(response.body)['error'], // Display error
+            ),
+          ];
+        });
       }
     } catch (error) {
       print('Error sending request: $error');
@@ -313,6 +686,43 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
                             fontSize: 18, fontWeight: FontWeight.bold)),
                     Text(widget.question['constraints'],
                         style: TextStyle(fontSize: 16)),
+                    SizedBox(height: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: List<Widget>.generate(
+                        widget.question['test_cases'].length,
+                        (index) {
+                          final testCase = widget.question['test_cases'][index];
+                          return Card(
+                            margin: EdgeInsets.symmetric(vertical: 8),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("Input: ${testCase['input']}",
+                                      style: TextStyle(fontSize: 16)),
+                                  Text("Output: ${testCase['output']}",
+                                      style: TextStyle(fontSize: 16)),
+                                  if (testCase['is_public'])
+                                    Text(
+                                        "Explanation: ${testCase['explanation'] ?? ''}",
+                                        style: TextStyle(fontSize: 16)),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    Text("Difficulty",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 8),
+                    Text(widget.question['difficulty'],
+                        style: TextStyle(fontSize: 16)),
+                    SizedBox(height: 16),
                   ],
                 ),
               ),
@@ -391,21 +801,163 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
 }
 
 // Model for test case result
+// class TestCaseResult {
+//   final String testCase;
+//   final String expectedResult;
+//   final String actualResult;
+//   final bool passed;
+
+//   TestCaseResult({
+//     required this.testCase,
+//     required this.expectedResult,
+//     required this.actualResult,
+//     required this.passed,
+//   });
+// }
+
 class TestCaseResult {
   final String testCase;
   final String expectedResult;
   final String actualResult;
   final bool passed;
+  final String errorMessage; // Add errorMessage field
 
   TestCaseResult({
     required this.testCase,
     required this.expectedResult,
     required this.actualResult,
     required this.passed,
+    this.errorMessage = '', // Define errorMessage as an optional parameter
   });
 }
 
-// Widget to display test case results in a table
+// // Widget to display test case results in a table
+// class TestCaseResultsTable extends StatelessWidget {
+//   final List<TestCaseResult> testResults;
+
+//   TestCaseResultsTable({required this.testResults});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         Text("Test Results",
+//             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+//         Divider(thickness: 2),
+//         Column(
+//           children: testResults.map((result) {
+//             return Row(
+//               children: [
+//                 Expanded(child: Text("Input: ${result.testCase}")),
+//                 Expanded(child: Text("Expected: ${result.expectedResult}")),
+//                 Expanded(child: Text("Actual: ${result.actualResult}")),
+//                 Expanded(child: Text(result.passed ? "Passed" : "Failed")),
+//               ],
+//             );
+//           }).toList(),
+//         ),
+//       ],
+//     );
+//   }
+// }
+
+// class TestCaseResultsTable extends StatelessWidget {
+//   final List<TestCaseResult> testResults;
+
+//   TestCaseResultsTable({required this.testResults});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         Text("Test Results",
+//             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+//         Divider(thickness: 2),
+//         Column(
+//           children: testResults.map((result) {
+//             return Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Row(
+//                   children: [
+//                     Expanded(child: Text("Input: ${result.testCase}")),
+//                     Expanded(child: Text("Expected: ${result.expectedResult}")),
+//                     Expanded(child: Text("Actual: ${result.actualResult}")),
+//                     Expanded(child: Text(result.passed ? "Passed" : "Failed")),
+//                   ],
+//                 ),
+//                 if (!result.passed && result.errorMessage != null)
+//                   Padding(
+//                     padding: const EdgeInsets.only(left: 16.0),
+//                     child: Text(
+//                       // result.errorMessage!,
+//                       "Error: ${result.errorMessage}",
+//                       style: TextStyle(color: Colors.red, fontSize: 14),
+//                     ),
+//                   ),
+//                 Divider(thickness: 1),
+//               ],
+//             );
+//           }).toList(),
+//         ),
+//       ],
+//     );
+//   }
+// }
+
+// class TestCaseResultsTable extends StatelessWidget {
+//   final List<TestCaseResult> testResults;
+
+//   TestCaseResultsTable({required this.testResults});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         Text("Test Results",
+//             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+//         Divider(thickness: 2),
+//         Column(
+//           children: testResults.map((result) {
+//             return Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Row(
+//                   children: [
+//                     Expanded(child: Text("Input: ${result.testCase}")),
+//                     Expanded(child: Text("Expected: ${result.expectedResult}")),
+//                     Expanded(child: Text("Actual: ${result.actualResult}")),
+//                     Expanded(
+//                         child: Text(
+//                       result.passed ? "Passed" : "Failed",
+//                       style: TextStyle(
+//                         color: result.passed ? Colors.green : Colors.red,
+//                       ),
+//                     )),
+//                   ],
+//                 ),
+//                 if (!result.passed && result.errorMessage.isNotEmpty)
+//                   Padding(
+//                     padding: const EdgeInsets.only(top: 4.0),
+//                     child: Text(
+//                       "Error: ${result.errorMessage}",
+//                       style: TextStyle(
+//                           color: Colors.red, fontStyle: FontStyle.italic),
+//                     ),
+//                   ),
+//                 Divider(thickness: 1),
+//               ],
+//             );
+//           }).toList(),
+//         ),
+//       ],
+//     );
+//   }
+// }
+
 class TestCaseResultsTable extends StatelessWidget {
   final List<TestCaseResult> testResults;
 
@@ -421,12 +973,33 @@ class TestCaseResultsTable extends StatelessWidget {
         Divider(thickness: 2),
         Column(
           children: testResults.map((result) {
-            return Row(
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: Text("Input: ${result.testCase}")),
-                Expanded(child: Text("Expected: ${result.expectedResult}")),
-                Expanded(child: Text("Actual: ${result.actualResult}")),
-                Expanded(child: Text(result.passed ? "Passed" : "Failed")),
+                Row(
+                  children: [
+                    Expanded(child: Text("Input: ${result.testCase}")),
+                    Expanded(child: Text("Expected: ${result.expectedResult}")),
+                    Expanded(child: Text("Actual: ${result.actualResult}")),
+                    Expanded(
+                        child: Text(
+                      result.passed ? "Passed" : "Failed",
+                      style: TextStyle(
+                        color: result.passed ? Colors.green : Colors.red,
+                      ),
+                    )),
+                  ],
+                ),
+                if (!result.passed && result.errorMessage.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text(
+                      "Error: ${result.errorMessage}",
+                      style: TextStyle(
+                          color: Colors.red, fontStyle: FontStyle.italic),
+                    ),
+                  ),
+                Divider(thickness: 1),
               ],
             );
           }).toList(),
@@ -1711,35 +2284,35 @@ class DisplayCodePage extends StatelessWidget {
 // // // // //                     Text("Test Cases",
 // // // // //                         style: TextStyle(
 // // // // //                             fontSize: 18, fontWeight: FontWeight.bold)),
-// // // // //                     SizedBox(height: 8),
-// // // // //                     Column(
-// // // // //                       crossAxisAlignment: CrossAxisAlignment.start,
-// // // // //                       children: List<Widget>.generate(
-// // // // //                         widget.question['test_cases'].length,
-// // // // //                         (index) {
-// // // // //                           final testCase = widget.question['test_cases'][index];
-// // // // //                           return Card(
-// // // // //                             margin: EdgeInsets.symmetric(vertical: 8),
-// // // // //                             child: Padding(
-// // // // //                               padding: const EdgeInsets.all(12.0),
-// // // // //                               child: Column(
-// // // // //                                 crossAxisAlignment: CrossAxisAlignment.start,
-// // // // //                                 children: [
-// // // // //                                   Text("Input: ${testCase['input']}",
-// // // // //                                       style: TextStyle(fontSize: 16)),
-// // // // //                                   Text("Output: ${testCase['output']}",
-// // // // //                                       style: TextStyle(fontSize: 16)),
-// // // // //                                   if (testCase['is_public'])
-// // // // //                                     Text(
-// // // // //                                         "Explanation: ${testCase['explanation'] ?? ''}",
-// // // // //                                         style: TextStyle(fontSize: 16)),
-// // // // //                                 ],
-// // // // //                               ),
-// // // // //                             ),
-// // // // //                           );
-// // // // //                         },
-// // // // //                       ),
-// // // // //                     ),
+                    // SizedBox(height: 8),
+                    // Column(
+                    //   crossAxisAlignment: CrossAxisAlignment.start,
+                    //   children: List<Widget>.generate(
+                    //     widget.question['test_cases'].length,
+                    //     (index) {
+                    //       final testCase = widget.question['test_cases'][index];
+                    //       return Card(
+                    //         margin: EdgeInsets.symmetric(vertical: 8),
+                    //         child: Padding(
+                    //           padding: const EdgeInsets.all(12.0),
+                    //           child: Column(
+                    //             crossAxisAlignment: CrossAxisAlignment.start,
+                    //             children: [
+                    //               Text("Input: ${testCase['input']}",
+                    //                   style: TextStyle(fontSize: 16)),
+                    //               Text("Output: ${testCase['output']}",
+                    //                   style: TextStyle(fontSize: 16)),
+                    //               if (testCase['is_public'])
+                    //                 Text(
+                    //                     "Explanation: ${testCase['explanation'] ?? ''}",
+                    //                     style: TextStyle(fontSize: 16)),
+                    //             ],
+                    //           ),
+                    //         ),
+                    //       );
+                    //     },
+                    //   ),
+                    // ),
 // // // // //                     SizedBox(height: 16),
 // // // // //                     Text("Constraints",
 // // // // //                         style: TextStyle(
@@ -1747,27 +2320,27 @@ class DisplayCodePage extends StatelessWidget {
 // // // // //                     SizedBox(height: 8),
 // // // // //                     Text(widget.question['constraints'],
 // // // // //                         style: TextStyle(fontSize: 16)),
-// // // // //                     SizedBox(height: 16),
-// // // // //                     Text("Difficulty",
-// // // // //                         style: TextStyle(
-// // // // //                             fontSize: 18, fontWeight: FontWeight.bold)),
-// // // // //                     SizedBox(height: 8),
-// // // // //                     Text(widget.question['difficulty'],
-// // // // //                         style: TextStyle(fontSize: 16)),
-// // // // //                     SizedBox(height: 16),
+                    // SizedBox(height: 16),
+                    // Text("Difficulty",
+                    //     style: TextStyle(
+                    //         fontSize: 18, fontWeight: FontWeight.bold)),
+                    // SizedBox(height: 8),
+                    // Text(widget.question['difficulty'],
+                    //     style: TextStyle(fontSize: 16)),
+                    // SizedBox(height: 16),
 // // // // //                     Text("Allowed Languages",
 // // // // //                         style: TextStyle(
 // // // // //                             fontSize: 18, fontWeight: FontWeight.bold)),
 // // // // //                     SizedBox(height: 8),
-// // // // //                     Column(
-// // // // //                       crossAxisAlignment: CrossAxisAlignment.start,
-// // // // //                       children: List<Widget>.generate(
-// // // // //                         widget.question['allowed_languages'].length,
-// // // // //                         (index) => Text(
-// // // // //                           "- ${widget.question['allowed_languages'][index]}",
-// // // // //                           style: TextStyle(fontSize: 16),
-// // // // //                         ),
-// // // // //                       ),
+//                     Column(
+//                       crossAxisAlignment: CrossAxisAlignment.start,
+//                       children: List<Widget>.generate(
+//                         widget.question['allowed_languages'].length,
+//                         (index) => Text(
+//                           "- ${widget.question['allowed_languages'][index]}",
+//                           style: TextStyle(fontSize: 16),
+//                         ),
+//                       ),
 // // // // //                     ),
 // // // // //                   ],
 // // // // //                 ),
