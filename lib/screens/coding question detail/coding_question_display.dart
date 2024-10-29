@@ -5,8 +5,8 @@ import 'package:studentpanel100/package%20for%20code%20editor/code_field/code_fi
 import 'package:studentpanel100/package%20for%20code%20editor/line_numbers/line_number_style.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:html' as html;
-import 'package:highlight/languages/dart.dart'; // Syntax highlighting for Dart
+
+import 'package:studentpanel100/widgets/arrows_ui.dart';
 
 class CodingQuestionDetailPage extends StatefulWidget {
   final Map<String, dynamic> question;
@@ -29,6 +29,7 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
   TextEditingController _customInputController =
       TextEditingController(); // Controller for custom input
   bool _iscustomInputfieldVisible = false;
+  double _dividerPosition = 0.5;
 
   @override
   void initState() {
@@ -38,6 +39,13 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
 ***************  Select a Language  ***************
 ***************************************************
 ''');
+    _focusNode.addListener(() {
+      if (_focusNode.hasFocus) {
+        RawKeyboard.instance.addListener(_handleKeyPress);
+      } else {
+        RawKeyboard.instance.removeListener(_handleKeyPress);
+      }
+    });
   }
 
   @override
@@ -46,6 +54,75 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage> {
     _focusNode.dispose();
     _customInputController.dispose();
     super.dispose();
+  }
+
+  // Capture Ctrl + / keyboard event
+  void _handleKeyPress(RawKeyEvent event) {
+    if (event.isControlPressed &&
+        event.logicalKey == LogicalKeyboardKey.slash) {
+      _commentSelectedLines();
+    }
+  }
+
+  // Comment/uncomment selected lines based on language
+  void _commentSelectedLines() {
+    final selection = _codeController.selection;
+    final text = _codeController.text;
+    final commentSyntax = _selectedLanguage == 'Python' ? '#' : '//';
+
+    if (selection.isCollapsed) {
+      // No text is selected, so comment the current line
+      int lineStart = selection.start;
+      int lineEnd = selection.start;
+
+      // Find the start and end of the line
+      while (lineStart > 0 && text[lineStart - 1] != '\n') lineStart--;
+      while (lineEnd < text.length && text[lineEnd] != '\n') lineEnd++;
+
+      // Extract the current line and toggle comment
+      final lineText = text.substring(lineStart, lineEnd);
+      final isCommented = lineText.trimLeft().startsWith(commentSyntax);
+
+      // Toggle comment on the line
+      final newLineText = isCommented
+          ? lineText.replaceFirst(commentSyntax, '').trimLeft() // Uncomment
+          : '$commentSyntax $lineText'; // Comment
+
+      // Replace the line in the text
+      final newText = text.replaceRange(lineStart, lineEnd, newLineText);
+      _codeController.value = _codeController.value.copyWith(
+        text: newText,
+        selection: TextSelection.collapsed(
+            offset: isCommented
+                ? selection.start - commentSyntax.length - 1
+                : selection.start + commentSyntax.length + 1),
+      );
+    } else {
+      // Text is selected, so comment each selected line
+      final selectedText = text.substring(selection.start, selection.end);
+      final lines = selectedText.split('\n');
+      final allLinesCommented =
+          lines.every((line) => line.trimLeft().startsWith(commentSyntax));
+
+      // Toggle comment on each line
+      final commentedLines = lines.map((line) {
+        return allLinesCommented
+            ? line.replaceFirst(commentSyntax, '').trimLeft() // Uncomment
+            : '$commentSyntax $line'; // Comment
+      }).join('\n');
+
+      // Replace the selected text with the commented/uncommented text
+      final newText =
+          text.replaceRange(selection.start, selection.end, commentedLines);
+
+      _codeController.value = _codeController.value.copyWith(
+        text: newText,
+        selection: TextSelection(
+          baseOffset: selection.start,
+          extentOffset: selection.start + commentedLines.length,
+        ),
+      );
+    }
   }
 
   void _setStarterCode(String language) {
@@ -214,285 +291,358 @@ public class Main {
       appBar: AppBar(
         title: Text(widget.question['title']),
       ),
-      body: Row(
-        children: [
-          // Left Panel: Question details
-          Expanded(
-            flex: 2,
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(widget.question['title'],
-                        style: const TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 16),
-                    const Text("Description",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text(widget.question['description'],
-                        style: TextStyle(fontSize: 16)),
-                    const SizedBox(height: 16),
-                    const Text("Input Format",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text(widget.question['input_format'],
-                        style: TextStyle(fontSize: 16)),
-                    SizedBox(height: 16),
-                    const Text("Output Format",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text(widget.question['output_format'],
-                        style: TextStyle(fontSize: 16)),
-                    SizedBox(height: 16),
-                    const Text("Constraints",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text(widget.question['constraints'],
-                        style: TextStyle(fontSize: 16)),
-                    SizedBox(height: 8),
-                    Column(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final screenWidth = constraints.maxWidth;
+
+          // Calculate the width of the panels based on the divider position
+          final leftPanelWidth = screenWidth * _dividerPosition;
+          final rightPanelWidth = screenWidth * (1 - _dividerPosition);
+          return Row(
+            children: [
+              // Left Panel: Question details
+              Container(
+                width: leftPanelWidth,
+                color: Colors.white,
+                child: Padding(
+                  padding: EdgeInsets.all(25.0),
+                  child: SingleChildScrollView(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: List<Widget>.generate(
-                        widget.question['test_cases'].length,
-                        (index) {
-                          final testCase = widget.question['test_cases'][index];
-                          return Card(
-                            margin: EdgeInsets.symmetric(vertical: 8),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text("Input: ${testCase['input']}",
-                                      style: TextStyle(fontSize: 16)),
-                                  Text("Output: ${testCase['output']}",
-                                      style: TextStyle(fontSize: 16)),
-                                  if (testCase['is_public'])
-                                    Text(
-                                        "Explanation: ${testCase['explanation'] ?? ''}",
-                                        style: TextStyle(fontSize: 16)),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Text("Difficulty",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 8),
-                    Text(widget.question['difficulty'],
-                        style: TextStyle(fontSize: 16)),
-                    SizedBox(height: 16),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          VerticalDivider(width: 1, color: Colors.grey),
-
-          // Right Panel: Code editor and results
-          Expanded(
-            flex: 3,
-            child: SingleChildScrollView(
-              controller: _rightPanelScrollController,
-              child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Text("Select Language",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-
-                    // DropdownButton<String>(
-                    //   value: _selectedLanguage,
-                    //   onChanged: (String? newValue) {
-                    //     if (newValue != null &&
-                    //         newValue != "Please select a Language") {
-                    //       setState(() {
-                    //         _selectedLanguage = newValue;
-                    //         _setStarterCode(newValue);
-                    //       });
-                    //     }
-                    //   },
-                    //   items: [
-                    //     DropdownMenuItem<String>(
-                    //       value: "Please select a Language",
-                    //       child: Text("Please select a Language"),
-                    //     ),
-                    //     ...widget.question['allowed_languages']
-                    //         .cast<String>()
-                    //         .map<DropdownMenuItem<String>>((String language) {
-                    //       return DropdownMenuItem<String>(
-                    //         value: language,
-                    //         child: Text(language),
-                    //       );
-                    //     }).toList(),
-                    //   ],
-                    // ),
-
-                    DropdownButton<String>(
-                      value: _selectedLanguage,
-                      onChanged: (String? newValue) {
-                        if (newValue != null &&
-                            newValue != "Please select a Language") {
-                          if (_selectedLanguage != "Please select a Language") {
-                            // Show alert if a language was previously selected
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: Text("Change Language"),
-                                  content: Text(
-                                      "Changing the language will remove the current code. Do you want to proceed?"),
-                                  actions: [
-                                    TextButton(
-                                      child: Text("Cancel"),
-                                      onPressed: () {
-                                        Navigator.of(context)
-                                            .pop(); // Close the dialog
-                                      },
-                                    ),
-                                    TextButton(
-                                      child: Text("Proceed"),
-                                      onPressed: () {
-                                        // Proceed with changing the language and setting starter code
-                                        setState(() {
-                                          _selectedLanguage = newValue;
-                                          _setStarterCode(newValue);
-                                        });
-                                        Navigator.of(context)
-                                            .pop(); // Close the dialog
-                                      },
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          } else {
-                            // Directly set language and starter code if no language was selected previously
-                            setState(() {
-                              _selectedLanguage = newValue;
-                              _setStarterCode(newValue);
-                            });
-                          }
-                        }
-                      },
-                      items: [
-                        DropdownMenuItem<String>(
-                          value: "Please select a Language",
-                          child: Text("Please select a Language"),
-                        ),
-                        ...widget.question['allowed_languages']
-                            .cast<String>()
-                            .map<DropdownMenuItem<String>>((String language) {
-                          return DropdownMenuItem<String>(
-                            value: language,
-                            child: Text(language),
-                          );
-                        }).toList(),
-                      ],
-                    ),
-
-                    Container(
-                      height: MediaQuery.of(context).size.height / 2,
-                      child: CodeField(
-                        controller: _codeController,
-                        focusNode: _focusNode,
-                        textStyle: TextStyle(
-                            fontFamily: 'RobotoMono',
-                            fontSize: 16,
-                            color: Colors.white),
-                        cursorColor: Colors.white,
-                        background: Colors.black,
-                        expands: true,
-                        wrap: false,
-                        lineNumberStyle: LineNumberStyle(
-                          width: 40,
-                          margin: 8,
-                          textStyle: TextStyle(
-                              color: Colors.grey.shade600, fontSize: 16),
-                          background: Colors.grey.shade900,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            _runCode(
-                                allTestCases:
-                                    false); // Run only public test cases
-                          },
-                          child: Text('Run'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            _runCode(allTestCases: true); // Run all test cases
-                          },
-                          child: Text('Submit'),
-                        ),
-                        ElevatedButton(
-                          onPressed: _toggleInputFieldVisibility,
-                          child: Text('Custom Input'),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16),
-                    AnimatedCrossFade(
-                      duration: Duration(milliseconds: 300),
-                      firstChild: SizedBox.shrink(),
-                      secondChild: Column(
-                        children: [
-                          Container(
-                            // height: 250,
-                            width: MediaQuery.of(context).size.width * 0.25,
-                            child: TextField(
-                              minLines: 5,
-                              maxLines: 5,
-                              controller: _customInputController,
-                              decoration: InputDecoration(
-                                hintText: "Enter custom input",
-                                hintStyle: TextStyle(color: Colors.white54),
-                                filled: true,
-                                fillColor: Colors.black,
-                                border: OutlineInputBorder(),
-                              ),
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                          ElevatedButton(
-                            onPressed: () {
-                              _runCode(
-                                allTestCases: false,
-                                customInput: _customInputController.text,
+                        Text(widget.question['title'],
+                            style: const TextStyle(
+                                fontSize: 24, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 16),
+                        const Text("Description",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text(widget.question['description'],
+                            style: TextStyle(fontSize: 16)),
+                        const SizedBox(height: 16),
+                        const Text("Input Format",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text(widget.question['input_format'],
+                            style: TextStyle(fontSize: 16)),
+                        SizedBox(height: 16),
+                        const Text("Output Format",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text(widget.question['output_format'],
+                            style: TextStyle(fontSize: 16)),
+                        SizedBox(height: 16),
+                        const Text("Constraints",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text(widget.question['constraints'],
+                            style: TextStyle(fontSize: 16)),
+                        SizedBox(height: 8),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: List<Widget>.generate(
+                            widget.question['test_cases'].length,
+                            (index) {
+                              final testCase =
+                                  widget.question['test_cases'][index];
+                              return Card(
+                                margin: EdgeInsets.symmetric(vertical: 8),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text("Input: ${testCase['input']}",
+                                          style: TextStyle(fontSize: 16)),
+                                      Text("Output: ${testCase['output']}",
+                                          style: TextStyle(fontSize: 16)),
+                                      if (testCase['is_public'])
+                                        Text(
+                                            "Explanation: ${testCase['explanation'] ?? ''}",
+                                            style: TextStyle(fontSize: 16)),
+                                    ],
+                                  ),
+                                ),
                               );
                             },
-                            child: Text('Run Custom Input'),
                           ),
-                        ],
-                      ),
-                      crossFadeState: _iscustomInputfieldVisible
-                          ? CrossFadeState.showSecond
-                          : CrossFadeState.showFirst,
+                        ),
+                        SizedBox(height: 16),
+                        Text("Difficulty",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 8),
+                        Text(widget.question['difficulty'],
+                            style: TextStyle(fontSize: 16)),
+                        SizedBox(height: 16),
+                      ],
                     ),
-                    SizedBox(height: 16),
-                    if (testResults.isNotEmpty)
-                      TestCaseResultsTable(testResults: testResults),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
-        ],
+              // VerticalDivider(width: 1, color: Colors.grey),
+              GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onHorizontalDragUpdate: (details) {
+                  setState(() {
+                    _dividerPosition += details.delta.dx / screenWidth;
+                    // Limit the position between 0.35 (35%) and 0.55 (55%)
+                    _dividerPosition = _dividerPosition.clamp(0.28, 0.55);
+                  });
+                },
+                child: Container(
+                  color: Colors.transparent,
+                  width: 22,
+                  child: Center(
+                    child: Row(
+                      children: [
+                        Container(
+                          height: 5,
+                          width: 10,
+                          color: Colors.transparent,
+                          child: CustomPaint(
+                            painter: LeftArrowPainter(
+                              strokeColor: Colors.grey,
+                              strokeWidth: 0,
+                              paintingStyle: PaintingStyle.fill,
+                            ),
+                            child: const SizedBox(
+                              height: 5,
+                              width: 10,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          height: double.infinity,
+                          width: 2,
+                          decoration: BoxDecoration(
+                            color: Colors.grey,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        Container(
+                          height: 5,
+                          width: 10,
+                          color: Colors.transparent,
+                          child: CustomPaint(
+                            painter: RightArrowPainter(
+                              strokeColor: Colors.grey,
+                              strokeWidth: 0,
+                              paintingStyle: PaintingStyle.fill,
+                            ),
+                            child: const SizedBox(
+                              height: 5,
+                              width: 10,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // Right Panel: Code editor and results
+              Expanded(
+                child: Container(
+                  width: rightPanelWidth,
+                  height: MediaQuery.of(context).size.height * 2,
+                  color: Colors.white,
+                  child: SingleChildScrollView(
+                    controller: _rightPanelScrollController,
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          Text("Select Language",
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold)),
+                          DropdownButton<String>(
+                            value: _selectedLanguage,
+                            onChanged: (String? newValue) {
+                              if (newValue != null &&
+                                  newValue != "Please select a Language") {
+                                if (_selectedLanguage !=
+                                    "Please select a Language") {
+                                  // Show alert if a language was previously selected
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text("Change Language"),
+                                        content: Text(
+                                            "Changing the language will remove the current code. Do you want to proceed?"),
+                                        actions: [
+                                          TextButton(
+                                            child: Text("Cancel"),
+                                            onPressed: () {
+                                              Navigator.of(context)
+                                                  .pop(); // Close the dialog
+                                            },
+                                          ),
+                                          TextButton(
+                                            child: Text("Proceed"),
+                                            onPressed: () {
+                                              // Proceed with changing the language and setting starter code
+                                              setState(() {
+                                                _selectedLanguage = newValue;
+                                                _setStarterCode(newValue);
+                                              });
+                                              Navigator.of(context)
+                                                  .pop(); // Close the dialog
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                } else {
+                                  // Directly set language and starter code if no language was selected previously
+                                  setState(() {
+                                    _selectedLanguage = newValue;
+                                    _setStarterCode(newValue);
+                                  });
+                                }
+                              }
+                            },
+                            items: [
+                              DropdownMenuItem<String>(
+                                value: "Please select a Language",
+                                child: Text("Please select a Language"),
+                              ),
+                              ...widget.question['allowed_languages']
+                                  .cast<String>()
+                                  .map<DropdownMenuItem<String>>(
+                                      (String language) {
+                                return DropdownMenuItem<String>(
+                                  value: language,
+                                  child: Text(language),
+                                );
+                              }).toList(),
+                            ],
+                          ),
+                          Focus(
+                            focusNode:
+                                _focusNode, // Attach the focus node to Focus only
+                            onKeyEvent: (FocusNode node, KeyEvent keyEvent) {
+                              if (keyEvent is KeyDownEvent) {
+                                final keysPressed = HardwareKeyboard
+                                    .instance.logicalKeysPressed;
+
+                                // Check for Ctrl + / shortcut
+                                if (keysPressed.contains(
+                                        LogicalKeyboardKey.controlLeft) &&
+                                    keysPressed
+                                        .contains(LogicalKeyboardKey.slash)) {
+                                  _commentSelectedLines();
+                                  return KeyEventResult.handled;
+                                }
+                              }
+                              return KeyEventResult.ignored;
+                            },
+                            child: Container(
+                              // height: 200,
+                              height: MediaQuery.of(context).size.height / 1.9,
+                              child: CodeField(
+                                controller: _codeController,
+                                focusNode: FocusNode(),
+                                textStyle: TextStyle(
+                                  fontFamily: 'RobotoMono',
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                ),
+                                cursorColor: Colors.white,
+                                background: Colors.black,
+                                expands: true,
+                                wrap: false,
+                                lineNumberStyle: LineNumberStyle(
+                                  width: 40,
+                                  margin: 8,
+                                  textStyle: TextStyle(
+                                    color: Colors.grey.shade600,
+                                    fontSize: 16,
+                                  ),
+                                  background: Colors.grey.shade900,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  _runCode(allTestCases: false);
+                                },
+                                child: Text('Run'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  _runCode(allTestCases: true);
+                                },
+                                child: Text('Submit'),
+                              ),
+                              ElevatedButton(
+                                onPressed: _toggleInputFieldVisibility,
+                                child: Text('Custom Input'),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 16),
+                          AnimatedCrossFade(
+                            duration: Duration(milliseconds: 300),
+                            firstChild: SizedBox.shrink(),
+                            secondChild: Column(
+                              children: [
+                                Container(
+                                  // height: 250,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.25,
+                                  child: TextField(
+                                    minLines: 5,
+                                    maxLines: 5,
+                                    controller: _customInputController,
+                                    decoration: InputDecoration(
+                                      hintText: "Enter custom input",
+                                      hintStyle:
+                                          TextStyle(color: Colors.white54),
+                                      filled: true,
+                                      fillColor: Colors.black,
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                                SizedBox(height: 10),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    _runCode(
+                                      allTestCases: false,
+                                      customInput: _customInputController.text,
+                                    );
+                                  },
+                                  child: Text('Run Custom Input'),
+                                ),
+                              ],
+                            ),
+                            crossFadeState: _iscustomInputfieldVisible
+                                ? CrossFadeState.showSecond
+                                : CrossFadeState.showFirst,
+                          ),
+                          SizedBox(height: 16),
+                          if (testResults.isNotEmpty)
+                            TestCaseResultsTable(testResults: testResults),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -537,7 +687,6 @@ class TestCaseResultsTable extends StatelessWidget {
                   children: [
                     Expanded(child: Text("Input: ${result.testCase}")),
                     Expanded(child: Text("Output: ${result.actualResult}")),
-                    // Display "-" for "Expected" and "Pass/Fail" in custom inputs
                     Expanded(
                       child: Text(
                         result.isCustomInput
@@ -559,7 +708,6 @@ class TestCaseResultsTable extends StatelessWidget {
                     ),
                   ],
                 ),
-                // Always display the error message if it exists
                 if (result.errorMessage.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 4.0),
@@ -588,13 +736,13 @@ class DisplayCodePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Your Code'),
+        title: const Text('Your Code'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Text(
           code,
-          style: TextStyle(
+          style: const TextStyle(
               fontFamily: 'SourceCodePro', fontSize: 16, color: Colors.black),
         ),
       ),
