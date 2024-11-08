@@ -147,34 +147,6 @@ public class Main {
     return Padding(
       padding: EdgeInsets.all(16.0),
       child: SingleChildScrollView(
-        // child: Column(
-        //   crossAxisAlignment: CrossAxisAlignment.start,
-        //   children: [
-        //     Text(widget.question['title'],
-        //         style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-        //     SizedBox(height: 16),
-        //     Text("Description",
-        //         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        //     Text(widget.question['description'],
-        //         style: TextStyle(fontSize: 16)),
-        //     SizedBox(height: 16),
-        //     Text("Input Format",
-        //         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        //     Text(widget.question['input_format'],
-        //         style: TextStyle(fontSize: 16)),
-        //     SizedBox(height: 16),
-        //     Text("Output Format",
-        //         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        //     Text(widget.question['output_format'],
-        //         style: TextStyle(fontSize: 16)),
-        //     SizedBox(height: 16),
-        //     Text("Constraints",
-        //         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        //     Text(widget.question['constraints'],
-        //         style: TextStyle(fontSize: 16)),
-        //     SizedBox(height: 16),
-        //   ],
-        // ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -243,14 +215,6 @@ public class Main {
   }
 
   Widget codefieldbox() {
-    // return LayoutBuilder(
-    //   builder: (context, constraints) {
-    // final screenWidth = constraints.maxWidth;
-
-    // // Calculate the width of the panels based on the divider position
-    // final leftPanelWidth = screenWidth * _dividerPosition;
-    // final rightPanelWidth = screenWidth * (1 - _dividerPosition);
-
     return Expanded(
       child: Container(
         // width: rightPanelWidth,
@@ -450,29 +414,6 @@ public class Main {
       padding: EdgeInsets.all(16.0),
       child: Column(
         children: [
-          // DropdownButton<String>(
-          //   value: _selectedLanguage,
-          //   onChanged: (String? newValue) {
-          //     if (newValue != null && newValue != "Please select a Language") {
-          //       setState(() {
-          //         _selectedLanguage = newValue;
-          //       });
-          //     }
-          //   },
-          //   items: [
-          //     DropdownMenuItem(
-          //         value: "Please select a Language",
-          //         child: Text("Please select a Language")),
-          //     ...widget.question['allowed_languages']
-          //         .cast<String>()
-          //         .map<DropdownMenuItem<String>>(
-          //       (String language) {
-          //         return DropdownMenuItem(
-          //             value: language, child: Text(language));
-          //       },
-          //     ).toList(),
-          //   ],
-          // ),
           Text("Select Language",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           DropdownButton<String>(
@@ -534,25 +475,6 @@ public class Main {
               }).toList(),
             ],
           ),
-          // Expanded(
-          //   child: CodeField(
-          //     controller: _codeController,
-          //     focusNode: _focusNode,
-          //     textStyle: TextStyle(
-          //         fontFamily: 'RobotoMono', fontSize: 16, color: Colors.white),
-          //     cursorColor: Colors.white,
-          //     background: Colors.black,
-          //     expands: true,
-          //     wrap: false,
-          //     lineNumberStyle: LineNumberStyle(
-          //       width: 40,
-          //       margin: 8,
-          //       textStyle: TextStyle(color: Colors.grey.shade600, fontSize: 16),
-          //       background: Colors.grey.shade900,
-          //     ),
-          //   ),
-          // ),
-
           Expanded(
             child: Focus(
               focusNode: _focusNode, // Attach the focus node to Focus only
@@ -743,13 +665,6 @@ public class Main {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ElevatedButton(
-            //   onPressed: () {
-            //     _runCode(allTestCases: false);
-            //   },
-            //   child: Text('Run'),
-            // ),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -783,14 +698,6 @@ public class Main {
   Widget buildMobileView() {
     return Column(
       children: [
-        // TabBar(
-        //   controller: _tabController,
-        //   tabs: [
-        //     Tab(text: "Question"),
-        //     Tab(text: "Code"),
-        //     Tab(text: "Output"),
-        //   ],
-        // ),
         Expanded(
           child: TabBarView(
             controller: _tabController,
@@ -823,34 +730,6 @@ public class Main {
                 child: Padding(
                   padding: EdgeInsets.all(16.0),
                   child: SingleChildScrollView(
-                    // child: Column(
-                    //   crossAxisAlignment: CrossAxisAlignment.start,
-                    //   children: [
-                    //     Text(widget.question['title'],
-                    //         style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                    //     SizedBox(height: 16),
-                    //     Text("Description",
-                    //         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    //     Text(widget.question['description'],
-                    //         style: TextStyle(fontSize: 16)),
-                    //     SizedBox(height: 16),
-                    //     Text("Input Format",
-                    //         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    //     Text(widget.question['input_format'],
-                    //         style: TextStyle(fontSize: 16)),
-                    //     SizedBox(height: 16),
-                    //     Text("Output Format",
-                    //         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    //     Text(widget.question['output_format'],
-                    //         style: TextStyle(fontSize: 16)),
-                    //     SizedBox(height: 16),
-                    //     Text("Constraints",
-                    //         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    //     Text(widget.question['constraints'],
-                    //         style: TextStyle(fontSize: 16)),
-                    //     SizedBox(height: 16),
-                    //   ],
-                    // ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -993,97 +872,6 @@ public class Main {
       ),
     );
   }
-  // Widget buildDesktopView() {
-  //   return LayoutBuilder(builder: (context, constraints) {
-  //     final screenWidth = constraints.maxWidth;
-
-  //     // Calculate the width of the panels based on the divider position
-  //     final leftPanelWidth = screenWidth * _dividerPosition;
-  //     final rightPanelWidth = screenWidth * (1 - _dividerPosition);
-  //     return Row(
-  //       children: [
-  //         Container(
-  //           width: MediaQuery.of(context).size.width * _dividerPosition,
-  //           color: Colors.white,
-  //           child: buildQuestionPanel(),
-  //         ),
-  // GestureDetector(
-  //   behavior: HitTestBehavior.translucent,
-  //   onHorizontalDragUpdate: (details) {
-  //     setState(() {
-  //       _dividerPosition += details.delta.dx / screenWidth;
-  //       // Limit the position between 0.35 (35%) and 0.55 (55%)
-  //       _dividerPosition = _dividerPosition.clamp(0.28, 0.55);
-  //     });
-  //   },
-  //   child: Container(
-  //     color: Colors.transparent,
-  //     width: 22,
-  //     child: Center(
-  //       child: Row(
-  //         children: [
-  //           Container(
-  //             height: 5,
-  //             width: 10,
-  //             color: Colors.transparent,
-  //             child: CustomPaint(
-  //               painter: LeftArrowPainter(
-  //                 strokeColor: Colors.grey,
-  //                 strokeWidth: 0,
-  //                 paintingStyle: PaintingStyle.fill,
-  //               ),
-  //               child: const SizedBox(
-  //                 height: 5,
-  //                 width: 10,
-  //               ),
-  //             ),
-  //           ),
-  //           Container(
-  //             height: double.infinity,
-  //             width: 2,
-  //             decoration: BoxDecoration(
-  //               color: Colors.grey,
-  //               borderRadius: BorderRadius.circular(2),
-  //             ),
-  //           ),
-  //           Container(
-  //             height: 5,
-  //             width: 10,
-  //             color: Colors.transparent,
-  //             child: CustomPaint(
-  //               painter: RightArrowPainter(
-  //                 strokeColor: Colors.grey,
-  //                 strokeWidth: 0,
-  //                 paintingStyle: PaintingStyle.fill,
-  //               ),
-  //               child: const SizedBox(
-  //                 height: 5,
-  //                 width: 10,
-  //               ),
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   ),
-  // ),
-  //
-  //
-  // Expanded(
-  //           child: Column(
-  //             children: [
-  //               // Expanded(child: buildCodeEditorPanel()),
-  //               // Divider(height: 1),
-  //               // Expanded(child: buildOutputPanel()),
-  //               Expanded(child: buildCodeEditorPanel()),
-  //               Expanded(child: buildOutputPanel())
-  //             ],
-  //           ),
-  //         ),
-  //       ],
-  //     );
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {

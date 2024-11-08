@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../utils/shared_prefs.dart';
 import 'package:flutter/material.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class ApiService {
   static const String baseUrl = "http://localhost:3000/students";
@@ -72,6 +73,15 @@ class ApiService {
     } else {
       throw Exception('Failed to post data: ${response.statusCode}');
     }
+  }
+
+  static Future<int?> getStudentIdFromToken() async {
+    final token = await SharedPrefs.getToken();
+    if (token != null && !JwtDecoder.isExpired(token)) {
+      final decodedToken = JwtDecoder.decode(token);
+      return decodedToken['id'];
+    }
+    return null;
   }
 
   // Define the login method for user authentication
