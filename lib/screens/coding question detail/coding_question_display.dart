@@ -723,7 +723,8 @@ public class Main {
           final rightPanelWidth = screenWidth * (1 - _dividerPosition);
           return Row(
             children: [
-              Expanded(child: buildQuestionPanel()),
+              // Expanded(child: buildQuestionPanel()),
+
               Container(
                 width: leftPanelWidth,
                 child: Padding(
@@ -803,6 +804,7 @@ public class Main {
                   ),
                 ),
               ),
+
               GestureDetector(
                 behavior: HitTestBehavior.translucent,
                 onHorizontalDragUpdate: (details) {
