@@ -162,16 +162,16 @@ public class Main {
     Uri endpoint;
     switch (_selectedLanguage!.toLowerCase()) {
       case 'python':
-        endpoint = Uri.parse('http://localhost:8084/compile');
+        endpoint = Uri.parse('http://145.223.22.18:8084/compile');
         break;
       case 'java':
-        endpoint = Uri.parse('http://localhost:8083/compile');
+        endpoint = Uri.parse('http://145.223.22.18:8083/compile');
         break;
       case 'cpp':
-        endpoint = Uri.parse('http://localhost:8081/compile');
+        endpoint = Uri.parse('http://145.223.22.18:8081/compile');
         break;
       case 'c':
-        endpoint = Uri.parse('http://localhost:8082/compile');
+        endpoint = Uri.parse('http://145.223.22.18:8082/compile');
         break;
       default:
         print("Unsupported language selected");
@@ -998,16 +998,16 @@ class DisplayCodePage extends StatelessWidget {
 // //     Uri endpoint;
 // //     switch (_selectedLanguage!.toLowerCase()) {
 // //       case 'python':
-// //         endpoint = Uri.parse('http://localhost:8084/compile');
+// //         endpoint = Uri.parse('http://145.223.22.18:8084/compile');
 // //         break;
 // //       case 'java':
-// //         endpoint = Uri.parse('http://localhost:8083/compile');
+// //         endpoint = Uri.parse('http://145.223.22.18:8083/compile');
 // //         break;
 // //       case 'cpp':
-// //         endpoint = Uri.parse('http://localhost:8081/compile');
+// //         endpoint = Uri.parse('http://145.223.22.18:8081/compile');
 // //         break;
 // //       case 'c':
-// //         endpoint = Uri.parse('http://localhost:8082/compile');
+// //         endpoint = Uri.parse('http://145.223.22.18:8082/compile');
 // //         break;
 // //       default:
 // //         print("Unsupported language selected");
@@ -1365,16 +1365,16 @@ class DisplayCodePage extends StatelessWidget {
 //     Uri endpoint;
 //     switch (_selectedLanguage!.toLowerCase()) {
 //       case 'python':
-//         endpoint = Uri.parse('http://localhost:8084/compile');
+//         endpoint = Uri.parse('http://145.223.22.18:8084/compile');
 //         break;
 //       case 'java':
-//         endpoint = Uri.parse('http://localhost:8083/compile');
+//         endpoint = Uri.parse('http://145.223.22.18:8083/compile');
 //         break;
 //       case 'cpp':
-//         endpoint = Uri.parse('http://localhost:8081/compile');
+//         endpoint = Uri.parse('http://145.223.22.18:8081/compile');
 //         break;
 //       case 'c':
-//         endpoint = Uri.parse('http://localhost:8082/compile');
+//         endpoint = Uri.parse('http://145.223.22.18:8082/compile');
 //         break;
 //       default:
 //         print("Unsupported language selected");
@@ -2114,16 +2114,16 @@ class DisplayCodePage extends StatelessWidget {
 // // // //     Uri endpoint;
 // // // //     switch (_selectedLanguage!.toLowerCase()) {
 // // // //       case 'python':
-// // // //         endpoint = Uri.parse('http://localhost:8084/compile');
+// // // //         endpoint = Uri.parse('http://145.223.22.18:8084/compile');
 // // // //         break;
 // // // //       case 'java':
-// // // //         endpoint = Uri.parse('http://localhost:8083/compile');
+// // // //         endpoint = Uri.parse('http://145.223.22.18:8083/compile');
 // // // //         break;
 // // // //       case 'cpp':
-// // // //         endpoint = Uri.parse('http://localhost:8081/compile');
+// // // //         endpoint = Uri.parse('http://145.223.22.18:8081/compile');
 // // // //         break;
 // // // //       case 'c':
-// // // //         endpoint = Uri.parse('http://localhost:8082/compile');
+// // // //         endpoint = Uri.parse('http://145.223.22.18:8082/compile');
 // // // //         break;
 // // // //       default:
 // // // //         print("Unsupported language selected");
