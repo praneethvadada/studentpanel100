@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 class ApiService {
-  static const String baseUrl = "http://145.223.22.18:3000/students";
+  static const String baseUrl = "http://localhost:3000/students";
 
   // Method to handle token expiration and redirect to login page
   static Future<void> _handleExpiredToken(BuildContext context) async {
@@ -128,7 +128,7 @@ class ApiService {
 // import 'package:flutter/material.dart';
 
 // class ApiService {
-//   static const String baseUrl = "http://145.223.22.18:3000/students";
+//   static const String baseUrl = "http://localhost:3000/students";
 // // Method to handle token expiration and redirect to login page
 //   static Future<void> _handleExpiredToken(BuildContext context) async {
 //     await SharedPrefs.removeToken();
@@ -231,7 +231,7 @@ class ApiService {
 // // import '../utils/shared_prefs.dart';
 
 // // class ApiService {
-// //   static const String baseUrl = "http://145.223.22.18:3000/students";
+// //   static const String baseUrl = "http://localhost:3000/students";
 // //   static Future<Map<String, String>> _getHeaders() async {
 // //     final token =
 // //         await SharedPrefs.getToken(); // Retrieve token from SharedPreferences
@@ -345,7 +345,7 @@ class ApiService {
 
 // // // class ApiService {
 // // //   // Example API base URL
-// //   // static const String baseUrl = "http://145.223.22.18:3000";
+// //   // static const String baseUrl = "http://localhost:3000";
 
 // //   // // Helper function to get the token and return the headers with the JWT token
 // //   // static Future<Map<String, String>> _getHeaders() async {
@@ -401,7 +401,7 @@ class ApiService {
 // // // // import '../utils/shared_prefs.dart';
 
 // // // // class ApiService {
-// // // //   static const String baseUrl = "http://145.223.22.18:3000/students";
+// // // //   static const String baseUrl = "http://localhost:3000/students";
 
 // // // //   static Future<Map<String, dynamic>> login(
 // // // //       String email, String password) async {
