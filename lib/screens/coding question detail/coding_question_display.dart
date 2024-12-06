@@ -1,9 +1,13 @@
+import 'dart:async';
+import 'dart:ui';
+import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:studentpanel100/package%20for%20code%20editor/code_field/code_controller.dart';
 import 'package:studentpanel100/package%20for%20code%20editor/code_field/code_field.dart';
 import 'package:studentpanel100/package%20for%20code%20editor/line_numbers/line_number_style.dart';
 import 'package:http/http.dart' as http;
+import 'package:studentpanel100/utils/shared_prefs.dart';
 import 'dart:convert';
 import 'package:studentpanel100/widgets/arrows_ui.dart';
 
@@ -30,16 +34,50 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage>
   double _dividerPosition = 0.5;
   late TabController _tabController;
 
+//   @override
+//   void initState() {
+//     super.initState();
+//     print("[DEBUG] CodingQuestionDetailPage initState called");
+//     _tabController = TabController(length: 3, vsync: this);
+//     _codeController = CodeController(text: '''
+// ***************************************************
+// ***************  Select a Language  ***************
+// ***************************************************
+// ''');
+//     _focusNode.addListener(() {
+//       if (_focusNode.hasFocus) {
+//         RawKeyboard.instance.addListener(_handleKeyPress);
+//       } else {
+//         RawKeyboard.instance.removeListener(_handleKeyPress);
+//       }
+//     });
+//   }
+
   @override
   void initState() {
     super.initState();
     print("[DEBUG] CodingQuestionDetailPage initState called");
     _tabController = TabController(length: 3, vsync: this);
-    _codeController = CodeController(text: '''
+
+    // Initialize the code editor with fetched solution code or default text
+    final initialCode = widget.question['solution_code'] ??
+        '''
 ***************************************************
 ***************  Select a Language  ***************
 ***************************************************
-''');
+''';
+    _codeController = CodeController(text: initialCode);
+
+    // Set the default selected language
+    _selectedLanguage = widget.question['language'] ??
+        "Please select a Language"; // Fallback to default text if no language is set
+
+    // Set starter code for the selected language if solution_code is null
+    if (widget.question['solution_code'] == null &&
+        _selectedLanguage != "Please select a Language") {
+      _setStarterCode(_selectedLanguage!);
+    }
+
     _focusNode.addListener(() {
       if (_focusNode.hasFocus) {
         RawKeyboard.instance.addListener(_handleKeyPress);
@@ -287,6 +325,69 @@ public class Main {
                 Text("Select Language",
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                // DropdownButton<String>(
+                //   value: _selectedLanguage,
+                //   onChanged: (String? newValue) {
+                //     if (newValue != null &&
+                //         newValue != "Please select a Language") {
+                //       if (_selectedLanguage != "Please select a Language") {
+                //         // Show alert if a language was previously selected
+                //         showDialog(
+                //           context: context,
+                //           builder: (BuildContext context) {
+                //             return AlertDialog(
+                //               title: Text("Change Language"),
+                //               content: Text(
+                //                   "Changing the language will remove the current code. Do you want to proceed?"),
+                //               actions: [
+                //                 TextButton(
+                //                   child: Text("Cancel"),
+                //                   onPressed: () {
+                //                     Navigator.of(context)
+                //                         .pop(); // Close the dialog
+                //                   },
+                //                 ),
+                //                 TextButton(
+                //                   child: Text("Proceed"),
+                //                   onPressed: () {
+                //                     // Proceed with changing the language and setting starter code
+                //                     setState(() {
+                //                       _selectedLanguage = newValue;
+                //                       _setStarterCode(newValue);
+                //                     });
+                //                     Navigator.of(context)
+                //                         .pop(); // Close the dialog
+                //                   },
+                //                 ),
+                //               ],
+                //             );
+                //           },
+                //         );
+                //       } else {
+                //         // Directly set language and starter code if no language was selected previously
+                //         setState(() {
+                //           _selectedLanguage = newValue;
+                //           _setStarterCode(newValue);
+                //         });
+                //       }
+                //     }
+                //   },
+                //   items: [
+                //     DropdownMenuItem<String>(
+                //       value: "Please select a Language",
+                //       child: Text("Please select a Language"),
+                //     ),
+                //     ...widget.question['allowed_languages']
+                //         .cast<String>()
+                //         .map<DropdownMenuItem<String>>((String language) {
+                //       return DropdownMenuItem<String>(
+                //         value: language,
+                //         child: Text(language),
+                //       );
+                //     }).toList(),
+                //   ],
+                // ),
+
                 DropdownButton<String>(
                   value: _selectedLanguage,
                   onChanged: (String? newValue) {
@@ -349,6 +450,7 @@ public class Main {
                     }).toList(),
                   ],
                 ),
+
                 Focus(
                   focusNode: _focusNode, // Attach the focus node to Focus only
                   onKeyEvent: (FocusNode node, KeyEvent keyEvent) {
@@ -399,13 +501,19 @@ public class Main {
                   children: [
                     ElevatedButton(
                       onPressed: () {
-                        _runCode(allTestCases: false);
+                        _runCode(
+                          allTestCases: false,
+                          mode: 'run',
+                        );
                       },
                       child: Text('Run'),
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        _runCode(allTestCases: true);
+                        _runCode(
+                          allTestCases: true,
+                          mode: 'submit',
+                        );
                       },
                       child: Text('Submit'),
                     ),
@@ -444,6 +552,7 @@ public class Main {
                           _runCode(
                             allTestCases: false,
                             customInput: _customInputController.text,
+                            mode: 'run',
                           );
                         },
                         child: Text('Run Custom Input'),
@@ -474,6 +583,66 @@ public class Main {
         children: [
           Text("Select Language",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          // DropdownButton<String>(
+          //   value: _selectedLanguage,
+          //   onChanged: (String? newValue) {
+          //     if (newValue != null && newValue != "Please select a Language") {
+          //       if (_selectedLanguage != "Please select a Language") {
+          //         // Show alert if a language was previously selected
+          //         showDialog(
+          //           context: context,
+          //           builder: (BuildContext context) {
+          //             return AlertDialog(
+          //               title: Text("Change Language"),
+          //               content: Text(
+          //                   "Changing the language will remove the current code. Do you want to proceed?"),
+          //               actions: [
+          //                 TextButton(
+          //                   child: Text("Cancel"),
+          //                   onPressed: () {
+          //                     Navigator.of(context).pop(); // Close the dialog
+          //                   },
+          //                 ),
+          //                 TextButton(
+          //                   child: Text("Proceed"),
+          //                   onPressed: () {
+          //                     // Proceed with changing the language and setting starter code
+          //                     setState(() {
+          //                       _selectedLanguage = newValue;
+          //                       _setStarterCode(newValue);
+          //                     });
+          //                     Navigator.of(context).pop(); // Close the dialog
+          //                   },
+          //                 ),
+          //               ],
+          //             );
+          //           },
+          //         );
+          //       } else {
+          //         // Directly set language and starter code if no language was selected previously
+          //         setState(() {
+          //           _selectedLanguage = newValue;
+          //           _setStarterCode(newValue);
+          //         });
+          //       }
+          //     }
+          //   },
+          //   items: [
+          //     DropdownMenuItem<String>(
+          //       value: "Please select a Language",
+          //       child: Text("Please select a Language"),
+          //     ),
+          //     ...widget.question['allowed_languages']
+          //         .cast<String>()
+          //         .map<DropdownMenuItem<String>>((String language) {
+          //       return DropdownMenuItem<String>(
+          //         value: language,
+          //         child: Text(language),
+          //       );
+          //     }).toList(),
+          //   ],
+          // ),
+
           DropdownButton<String>(
             value: _selectedLanguage,
             onChanged: (String? newValue) {
@@ -533,6 +702,7 @@ public class Main {
               }).toList(),
             ],
           ),
+
           Expanded(
             child: Focus(
               focusNode: _focusNode, // Attach the focus node to Focus only
@@ -583,95 +753,28 @@ public class Main {
     );
   }
 
-  Future<void> _runCode(
-      {required bool allTestCases, String? customInput}) async {
-    if (_selectedLanguage == null || _codeController.text.trim().isEmpty) {
-      print("No valid code provided or language not selected");
-      return;
-    }
-
-    Uri endpoint;
-    switch (_selectedLanguage!.toLowerCase()) {
-      case 'python':
-        endpoint = Uri.parse('http://145.223.22.18:8084/compile');
-        break;
-      case 'java':
-        endpoint = Uri.parse('http://145.223.22.18:8083/compile');
-        break;
-      case 'cpp':
-        endpoint = Uri.parse('http://145.223.22.18:8081/compile');
-        break;
-      case 'c':
-        endpoint = Uri.parse('http://145.223.22.18:8082/compile');
-        break;
-      default:
-        print("Unsupported language selected");
-        return;
-    }
-
-    print('Selected Endpoint URL: $endpoint');
-
-    final String code = _codeController.text.trim();
-    List<Map<String, String>> testCases;
-
-    // Determine which test cases to send based on the button clicked
-    if (customInput != null) {
-      testCases = [
-        {
-          'input': customInput.trim() + '\n',
-          'output': '', // No expected output for custom input
-        },
-      ];
-    } else if (allTestCases) {
-      testCases = widget.question['test_cases']
-          .map<Map<String, String>>((testCase) => {
-                'input': testCase['input'].toString().trim() + '\n',
-                'output': testCase['output'].toString().trim(),
-              })
-          .toList();
-    } else {
-      // Run only public test cases
-      testCases = widget.question['test_cases']
-          .where((testCase) => testCase['is_public'] == true)
-          .map<Map<String, String>>((testCase) => {
-                'input': testCase['input'].toString().trim() + '\n',
-                'output': testCase['output'].toString().trim(),
-              })
-          .toList();
-    }
-
-    final Map<String, dynamic> requestBody = {
-      'language': _selectedLanguage!.toLowerCase(),
-      'code': code,
-      'testcases': testCases,
+  int _getPointsForDifficulty(String difficulty) {
+    final difficultyMapping = {
+      'Level1': 100,
+      'Level2': 200,
+      'Level3': 300,
+      'Level4': 400,
+      'Level5': 500,
     };
+    return difficultyMapping[difficulty] ??
+        0; // Default to 0 if difficulty is unknown
+  }
 
-    print('Request Body: ${jsonEncode(requestBody)}');
-
+  Future<void> _runCode({
+    required bool allTestCases,
+    String? customInput,
+    required String mode, // Add mode parameter to differentiate actions
+  }) async {
     try {
-      final response = await http.post(
-        endpoint,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(requestBody),
-      );
-
-      if (response.statusCode == 200) {
-        final List<dynamic> responseBody = jsonDecode(response.body);
-        setState(() {
-          testResults = responseBody.map((result) {
-            return TestCaseResult(
-              testCase: result['input'],
-              expectedResult: result['expected_output'] ?? '',
-              actualResult: result['actual_output'] ?? '',
-              passed: result['success'] ?? false,
-              errorMessage: result['error'] ?? '',
-            );
-          }).toList();
-        });
-        _scrollToResults();
-      } else {
-        print('Error: ${response.statusCode} - ${response.reasonPhrase}');
-        print('Backend Error Response: ${response.body}');
+      // Ensure a language is selected and code is provided
+      if (_selectedLanguage == null ||
+          _selectedLanguage == "Please select a Language") {
+        print("[DEBUG] No valid language selected");
         setState(() {
           testResults = [
             TestCaseResult(
@@ -679,13 +782,204 @@ public class Main {
               expectedResult: '',
               actualResult: '',
               passed: false,
-              errorMessage: jsonDecode(response.body)['error'],
+              errorMessage: "Please select a programming language.",
+            ),
+          ];
+        });
+        return;
+      }
+
+      if (_codeController.text.trim().isEmpty) {
+        print("[DEBUG] Code editor is empty");
+        setState(() {
+          testResults = [
+            TestCaseResult(
+              testCase: '',
+              expectedResult: '',
+              actualResult: '',
+              passed: false,
+              errorMessage: "Please provide some code.",
+            ),
+          ];
+        });
+        return;
+      }
+
+      // Determine the endpoint URL based on the selected language
+      Uri endpoint;
+      switch (_selectedLanguage!.toLowerCase()) {
+        case 'python':
+          endpoint = Uri.parse('http://localhost:8084/compile');
+          break;
+        case 'java':
+          endpoint = Uri.parse('http://145.223.22.18:5001/run-java');
+          break;
+        case 'cpp':
+          endpoint = Uri.parse('http://localhost:8081/compile');
+          break;
+        case 'c':
+          endpoint = Uri.parse('http://localhost:8082/compile');
+          break;
+        default:
+          print("[DEBUG] Unsupported language selected: $_selectedLanguage");
+          setState(() {
+            testResults = [
+              TestCaseResult(
+                testCase: '',
+                expectedResult: '',
+                actualResult: '',
+                passed: false,
+                errorMessage: "Unsupported programming language selected.",
+              ),
+            ];
+          });
+          return;
+      }
+
+      print("[DEBUG] Selected Endpoint: $endpoint");
+
+      // Prepare code and test cases
+      final String code = _codeController.text.trim();
+      List<Map<String, String>> testCases;
+
+      if (customInput != null) {
+        // Custom input provided by the user
+        testCases = [
+          {
+            'input': customInput.trim() + '\n',
+            'output': '', // Custom input doesn't have an expected output
+          },
+        ];
+      } else if (allTestCases) {
+        // All test cases
+        testCases = widget.question['test_cases']
+            .map<Map<String, String>>((testCase) => {
+                  'input': testCase['input'].toString().trim() + '\n',
+                  'output': testCase['output'].toString().trim(),
+                })
+            .toList();
+      } else {
+        // Only public test cases
+        testCases = widget.question['test_cases']
+            .where((testCase) => testCase['is_public'] == true)
+            .map<Map<String, String>>((testCase) => {
+                  'input': testCase['input'].toString().trim() + '\n',
+                  'output': testCase['output'].toString().trim(),
+                })
+            .toList();
+      }
+
+      final Map<String, dynamic> requestBody = {
+        'language': _selectedLanguage!.toLowerCase(),
+        'code': code,
+        'testcases': testCases,
+        'is_custom_input': customInput != null,
+        'mode': mode, // Use the passed mode
+      };
+
+      print("[DEBUG] Request Body: ${jsonEncode(requestBody)}");
+
+      // Send request to the compiler
+      final response = await http.post(
+        endpoint,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+
+      print("[DEBUG] Response Status Code: ${response.statusCode}");
+
+      if (response.statusCode == 200) {
+        print("[DEBUG] Response Body: ${response.body}");
+        final List<dynamic> responseBody = jsonDecode(response.body);
+
+        // Update test results in the UI
+        setState(() {
+          testResults = responseBody.map<TestCaseResult>((result) {
+            return TestCaseResult(
+              testCase: result['input'] ?? '',
+              expectedResult: result['expected_output'] ?? '',
+              actualResult: result['actual_output'] ?? '',
+              passed: result['success'] ?? false,
+              errorMessage: result['error'] ?? '',
+              isCustomInput: customInput != null,
+            );
+          }).toList();
+        });
+
+        // Only send to backend for "submit" mode
+        if (mode == "submit") {
+          final questionPoints =
+              _getPointsForDifficulty(widget.question["difficulty"] ?? '');
+
+          final backendRequest = {
+            "domain_id": widget.question["codingquestiondomain_id"],
+            "question_id": widget.question["id"],
+            "language": _selectedLanguage,
+            "solution_code": code,
+            "test_results": responseBody,
+            "question_points": questionPoints,
+            "mode": mode,
+          };
+          print("[DEBUG] Question Object: ${widget.question}");
+
+          if (widget.question["codingquestiondomain_id"] == null) {
+            print("[DEBUG] Missing domain_id in question object");
+            return;
+          }
+
+          print(
+              "[DEBUG] Backend Requesttttttttt Payload: ${jsonEncode(backendRequest)}");
+          final token = await SharedPrefs.getToken();
+          final backendResponse = await http.post(
+            Uri.parse(
+                "http://localhost:3000/students/practice-coding-question-submit"),
+            headers: {
+              'Content-Type': 'application/json',
+              "Authorization": "Bearer $token",
+            },
+            body: jsonEncode(backendRequest),
+          );
+
+          print(
+              "[DEBUG] Backend Response: ${backendResponse.statusCode} - ${backendResponse.body}");
+
+          if (backendResponse.statusCode != 201) {
+            print("[DEBUG] Backend Submission Error: ${backendResponse.body}");
+          }
+        }
+
+        _scrollToResults();
+      } else {
+        print("[DEBUG] Error Response Body: ${response.body}");
+        final errorResponse = jsonDecode(response.body);
+
+        setState(() {
+          testResults = [
+            TestCaseResult(
+              testCase: '',
+              expectedResult: '',
+              actualResult: '',
+              passed: false,
+              errorMessage:
+                  errorResponse['message'] ?? 'Compilation error occurred',
             ),
           ];
         });
       }
     } catch (error) {
-      print('Error sending request: $error');
+      print("[DEBUG] HTTP Request Error: $error");
+
+      setState(() {
+        testResults = [
+          TestCaseResult(
+            testCase: '',
+            expectedResult: '',
+            actualResult: '',
+            passed: false,
+            errorMessage: "Failed to connect to the server. Please try again.",
+          ),
+        ];
+      });
     }
   }
 
@@ -697,17 +991,6 @@ public class Main {
         curve: Curves.easeOut,
       );
     });
-  }
-
-  void _navigateToCodeDisplay(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DisplayCodePage(
-          code: _codeController.text,
-        ),
-      ),
-    );
   }
 
   void _toggleInputFieldVisibility() {
@@ -728,13 +1011,19 @@ public class Main {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    _runCode(allTestCases: false);
+                    _runCode(
+                      allTestCases: false,
+                      mode: 'run',
+                    );
                   },
                   child: Text('Run'),
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    _runCode(allTestCases: true);
+                    _runCode(
+                      allTestCases: true,
+                      mode: 'submit',
+                    );
                   },
                   child: Text('Submit'),
                 ),
@@ -996,6 +1285,11 @@ public class Main {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context, true); // Return true if changes are made
+            },
+            icon: Icon(Icons.arrow_back)),
         title: Text(widget.question['title']),
         bottom: isMobile
             ? TabBar(controller: _tabController, tabs: [
@@ -1047,23 +1341,33 @@ class TestCaseResultsTable extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Expanded(child: Text("Input: ${result.testCase}")),
-                    Expanded(child: Text("Output: ${result.actualResult}")),
                     Expanded(
                       child: Text(
-                        result.isCustomInput
-                            ? "-"
-                            : "Expected: ${result.expectedResult}",
+                        "Input: ${result.testCase}",
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
                     Expanded(
                       child: Text(
+                        "Output: ${result.actualResult}",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    if (!result.isCustomInput)
+                      Expanded(
+                        child: Text(
+                          "Expected: ${result.expectedResult}",
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ),
+                    Expanded(
+                      child: Text(
                         result.isCustomInput
-                            ? "-"
+                            ? "Custom Run"
                             : (result.passed ? "Passed" : "Failed"),
                         style: TextStyle(
                           color: result.isCustomInput
-                              ? Colors.black
+                              ? Colors.blue
                               : (result.passed ? Colors.green : Colors.red),
                         ),
                       ),
@@ -1085,29 +1389,6 @@ class TestCaseResultsTable extends StatelessWidget {
           }).toList(),
         ),
       ],
-    );
-  }
-}
-
-class DisplayCodePage extends StatelessWidget {
-  final String code;
-
-  DisplayCodePage({required this.code});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Your Code'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Text(
-          code,
-          style: const TextStyle(
-              fontFamily: 'SourceCodePro', fontSize: 16, color: Colors.black),
-        ),
-      ),
     );
   }
 }

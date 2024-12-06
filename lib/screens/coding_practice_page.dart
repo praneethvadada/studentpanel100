@@ -185,6 +185,122 @@ class _CodingQuestionPageState extends State<CodingQuestionPage> {
     }
   }
 
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Coding Questions'),
+//       ),
+//       body: _isLoading
+//           ? Center(child: CircularProgressIndicator())
+//           : _errorMessage.isNotEmpty
+//               ? Center(child: Text(_errorMessage))
+//               : ListView.builder(
+//                   itemCount: _questions.length,
+//                   itemBuilder: (context, index) {
+//                     final question = _questions[index];
+//                     return Card(
+//                       margin: EdgeInsets.all(8.0),
+//                       child: ListTile(
+//                         title: Text(
+//                           question['title'],
+//                           style: TextStyle(
+//                               fontSize: 18, fontWeight: FontWeight.bold),
+//                         ),
+//                         subtitle: Text("Difficulty: ${question['difficulty']}"),
+//                         trailing: Icon(Icons.arrow_forward),
+//                         onTap: () {
+//                           Navigator.push(
+//                             context,
+//                             MaterialPageRoute(
+//                               builder: (context) => CodingQuestionDetailPage(
+//                                 question: question,
+//                               ),
+//                             ),
+//                           );
+//                         },
+//                       ),
+//                     );
+//                   },
+//                 ),
+//     );
+//   }
+// }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Coding Questions'),
+//       ),
+//       body: _isLoading
+//           ? Center(child: CircularProgressIndicator())
+//           : _errorMessage.isNotEmpty
+//               ? Center(child: Text(_errorMessage))
+//               : ListView.builder(
+//                   itemCount: _questions.length,
+//                   itemBuilder: (context, index) {
+//                     final question = _questions[index];
+
+//                     // Calculate progress percentage
+//                     final score = question['score'] ?? 0;
+//                     final questionPoints = question['question_points'] ??
+//                         100; // Default 100 if null
+//                     final progress = score / questionPoints;
+
+//                     return Card(
+//                       margin: EdgeInsets.all(8.0),
+//                       child: Padding(
+//                         padding: const EdgeInsets.all(8.0),
+//                         child: Column(
+//                           crossAxisAlignment: CrossAxisAlignment.start,
+//                           children: [
+//                             ListTile(
+//                               title: Text(
+//                                 question['title'],
+//                                 style: TextStyle(
+//                                     fontSize: 18, fontWeight: FontWeight.bold),
+//                               ),
+//                               subtitle:
+//                                   Text("Difficulty: ${question['difficulty']}"),
+//                               trailing: Icon(Icons.arrow_forward),
+//                               onTap: () {
+//                                 Navigator.push(
+//                                   context,
+//                                   MaterialPageRoute(
+//                                     builder: (context) =>
+//                                         CodingQuestionDetailPage(
+//                                       question: question,
+//                                     ),
+//                                   ),
+//                                 );
+//                               },
+//                             ),
+//                             SizedBox(height: 8.0),
+//                             // Progress bar
+//                             Text(
+//                               'Progress: ${(progress * 100).toStringAsFixed(0)}%',
+//                               style: TextStyle(fontSize: 14),
+//                             ),
+//                             LinearProgressIndicator(
+//                               value: progress, // Progress value (0.0 to 1.0)
+//                               minHeight: 6.0,
+//                               backgroundColor: Colors.grey[300],
+//                               valueColor: AlwaysStoppedAnimation<Color>(
+//                                   progress < 1.0
+//                                       ? Colors.orange
+//                                       : Colors.green),
+//                             ),
+//                           ],
+//                         ),
+//                       ),
+//                     );
+//                   },
+//                 ),
+//     );
+//   }
+// }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -199,26 +315,67 @@ class _CodingQuestionPageState extends State<CodingQuestionPage> {
                   itemCount: _questions.length,
                   itemBuilder: (context, index) {
                     final question = _questions[index];
+
+                    // Calculate progress percentage
+                    final score = question['score'] ?? 0;
+                    // final questionPoints = question['question_points'] ?? 100;
+                    final questionPoints = 100;
+                    final progress = score / questionPoints;
+
                     return Card(
                       margin: EdgeInsets.all(8.0),
-                      child: ListTile(
-                        title: Text(
-                          question['title'],
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Text("Difficulty: ${question['difficulty']}"),
-                        trailing: Icon(Icons.arrow_forward),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CodingQuestionDetailPage(
-                                question: question,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ListTile(
+                              title: Text(
+                                question['title'],
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
                               ),
+                              subtitle:
+                                  Text("Difficulty: ${question['difficulty']}"),
+                              trailing: Icon(Icons.arrow_forward),
+                              onTap: () async {
+                                // Navigate to detail page and wait for result
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        CodingQuestionDetailPage(
+                                      question: question,
+                                    ),
+                                  ),
+                                );
+
+                                // Reload questions if result is returned
+                                if (result == true) {
+                                  setState(() {
+                                    _isLoading = true; // Show loader
+                                  });
+                                  await fetchQuestions(); // Reload questions
+                                }
+                              },
                             ),
-                          );
-                        },
+                            SizedBox(height: 8.0),
+                            // Progress bar
+                            Text(
+                              'Progress: ${(progress * 100).toStringAsFixed(0)}%',
+                              style: TextStyle(fontSize: 14),
+                            ),
+                            LinearProgressIndicator(
+                              value: progress,
+                              minHeight: 6.0,
+                              backgroundColor: Colors.grey[300],
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  progress < 1.0
+                                      ? Colors.orange
+                                      : Colors.green),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },

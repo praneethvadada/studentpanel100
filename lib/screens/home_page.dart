@@ -17,6 +17,7 @@ class _HomePageState extends State<HomePage> {
     HomeScreen(),
     PracticePage(),
     AssessmentPage(),
+    // FullScreenEnforcedPage(),
     ProfilePage(),
   ];
 

@@ -120,6 +120,75 @@ class ApiService {
       throw Exception('Error logging in: $error');
     }
   }
+
+  Future<List<dynamic>> fetchStudentAssessments() async {
+    final token = await SharedPrefs.getToken();
+
+    if (token != null) {
+      final response = await http.get(
+        Uri.parse('http://localhost:3000/assessments/live'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body)['assessments'];
+      } else {
+        print(response.body);
+        throw Exception('Failed to fetch assessments');
+      }
+    } else {
+      throw Exception('Token not found');
+    }
+  }
+
+  Future<List<dynamic>> fetchRoundsByAssessmentId(int assessmentId) async {
+    final token = await SharedPrefs.getToken();
+
+    if (token != null) {
+      final response = await http.get(
+        Uri.parse('http://localhost:3000/assessments/$assessmentId/rounds'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body)['rounds'];
+      } else {
+        print(response.body);
+        throw Exception('Failed to fetch rounds');
+      }
+    } else {
+      throw Exception('Token not found');
+    }
+  }
+
+  Future<List<dynamic>> fetchQuestionsByRoundId(int roundId) async {
+    final token = await SharedPrefs.getToken();
+
+    if (token != null) {
+      final response = await http.get(
+        Uri.parse('http://localhost:3000/assessments/round/$roundId/questions'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body)['questions'];
+      } else {
+        print(response.body);
+        throw Exception('Failed to fetch questions');
+      }
+    } else {
+      throw Exception('Token not found');
+    }
+  }
 }
 
 // import 'dart:convert';

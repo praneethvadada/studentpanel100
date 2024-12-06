@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'screens/login_page.dart';
 import 'screens/home_page.dart';
 import 'utils/shared_prefs.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 void main() {
+  setUrlStrategy(null); // Disables browser history navigation
+
   runApp(MyApp());
 }
 
