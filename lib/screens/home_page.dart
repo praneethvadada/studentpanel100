@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:studentpanel100/widgets/custom_card.dart';
 import 'practice_page.dart';
-import 'assessment_page.dart';
+import 'Assessments/assessment_page.dart';
 import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {

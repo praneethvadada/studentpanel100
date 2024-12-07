@@ -1,28 +1,27 @@
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'dart:async';
 import 'dart:ui';
-// import 'dart:html' as html;
+import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:studentpanel100/package%20for%20code%20editor/code_field/code_controller.dart';
 import 'package:studentpanel100/package%20for%20code%20editor/code_field/code_field.dart';
 import 'package:studentpanel100/package%20for%20code%20editor/line_numbers/line_number_style.dart';
-import 'package:http/http.dart' as http;
 import 'package:studentpanel100/utils/shared_prefs.dart';
-import 'dart:convert';
 import 'package:studentpanel100/widgets/arrows_ui.dart';
 
-class CodingQuestionDetailPage extends StatefulWidget {
-  final Map<String, dynamic> question;
+class CodingQuestionWidget extends StatefulWidget {
+  final Map<String, dynamic> codingQuestion;
 
-  const CodingQuestionDetailPage({Key? key, required this.question})
+  const CodingQuestionWidget({Key? key, required this.codingQuestion})
       : super(key: key);
 
   @override
-  State<CodingQuestionDetailPage> createState() =>
-      _CodingQuestionDetailPageState();
+  State<CodingQuestionWidget> createState() => _CodingQuestionWidgetState();
 }
 
-class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage>
+class _CodingQuestionWidgetState extends State<CodingQuestionWidget>
     with SingleTickerProviderStateMixin {
   late CodeController _codeController;
   final FocusNode _focusNode = FocusNode();
@@ -34,25 +33,6 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage>
   double _dividerPosition = 0.5;
   late TabController _tabController;
 
-//   @override
-//   void initState() {
-//     super.initState();
-//     print("[DEBUG] CodingQuestionDetailPage initState called");
-//     _tabController = TabController(length: 3, vsync: this);
-//     _codeController = CodeController(text: '''
-// ***************************************************
-// ***************  Select a Language  ***************
-// ***************************************************
-// ''');
-//     _focusNode.addListener(() {
-//       if (_focusNode.hasFocus) {
-//         RawKeyboard.instance.addListener(_handleKeyPress);
-//       } else {
-//         RawKeyboard.instance.removeListener(_handleKeyPress);
-//       }
-//     });
-//   }
-
   @override
   void initState() {
     super.initState();
@@ -60,7 +40,7 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage>
     _tabController = TabController(length: 3, vsync: this);
 
     // Initialize the code editor with fetched solution code or default text
-    final initialCode = widget.question['solution_code'] ??
+    final initialCode = widget.codingQuestion['solution_code'] ??
         '''
 ***************************************************
 ***************  Select a Language  ***************
@@ -69,11 +49,11 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage>
     _codeController = CodeController(text: initialCode);
 
     // Set the default selected language
-    _selectedLanguage = widget.question['language'] ??
+    _selectedLanguage = widget.codingQuestion['language'] ??
         "Please select a Language"; // Fallback to default text if no language is set
 
     // Set starter code for the selected language if solution_code is null
-    if (widget.question['solution_code'] == null &&
+    if (widget.codingQuestion['solution_code'] == null &&
         _selectedLanguage != "Please select a Language") {
       _setStarterCode(_selectedLanguage!);
     }
@@ -105,30 +85,80 @@ class _CodingQuestionDetailPageState extends State<CodingQuestionDetailPage>
     }
   }
 
+//   void _setStarterCode(String language) {
+//     String starterCode;
+//     switch (language.toLowerCase()) {
+//       case 'python':
+//         starterCode = '# Please Start Writing your Code here\n';
+//         break;
+//       case 'java':
+//         starterCode = '''
+// public class Main {
+//     public static void main(String[] args) {
+//         // Please Start Writing your Code from here
+//     }
+// }
+// ''';
+//         break;
+//       case 'c':
+//         starterCode = '// Please Start Writing your Code here\n';
+//         break;
+//       case 'cpp':
+//         starterCode = '// Please Start Writing your Code here\n';
+//         break;
+//       default:
+//         starterCode = '// Please Start Writing your Code here\n';
+//     }
+//     _codeController.text = starterCode;
+//   }
+
+
   void _setStarterCode(String language) {
     String starterCode;
+
     switch (language.toLowerCase()) {
       case 'python':
-        starterCode = '# Please Start Writing your Code here\n';
+        starterCode = '''
+# Please Start Writing your Python Code here
+''';
         break;
       case 'java':
         starterCode = '''
 public class Main {
     public static void main(String[] args) {
-        // Please Start Writing your Code from here
+        // Please Start Writing your Java Code from here
     }
 }
 ''';
         break;
       case 'c':
-        starterCode = '// Please Start Writing your Code here\n';
+        starterCode = '''
+#include <stdio.h>
+
+// Please Start Writing your C Code here
+int main() {
+    return 0;
+}
+''';
         break;
       case 'cpp':
-        starterCode = '// Please Start Writing your Code here\n';
+      case 'c++': // Handle alternative name for C++
+        starterCode = '''
+#include <iostream>
+using namespace std;
+
+// Please Start Writing your C++ Code here
+int main() {
+    return 0;
+}
+''';
         break;
       default:
-        starterCode = '// Please Start Writing your Code here\n';
+        starterCode =
+            '// Unsupported language. Please Start Writing your Code here\n';
     }
+
+    // Set the starter code in the text controller
     _codeController.text = starterCode;
   }
 
@@ -191,36 +221,36 @@ public class Main {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.question['title'],
+            Text(widget.codingQuestion['title'],
                 style:
                     const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             const Text("Description",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            Text(widget.question['description'],
+            Text(widget.codingQuestion['description'],
                 style: TextStyle(fontSize: 16)),
             const SizedBox(height: 16),
             const Text("Input Format",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            Text(widget.question['input_format'],
+            Text(widget.codingQuestion['input_format'],
                 style: TextStyle(fontSize: 16)),
             SizedBox(height: 16),
             const Text("Output Format",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            Text(widget.question['output_format'],
+            Text(widget.codingQuestion['output_format'],
                 style: TextStyle(fontSize: 16)),
             SizedBox(height: 16),
             const Text("Constraints",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            Text(widget.question['constraints'],
+            Text(widget.codingQuestion['constraints'],
                 style: TextStyle(fontSize: 16)),
             SizedBox(height: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: List<Widget>.generate(
-                widget.question['test_cases'].length,
+                widget.codingQuestion['test_cases'].length,
                 (index) {
-                  final testCase = widget.question['test_cases'][index];
+                  final testCase = widget.codingQuestion['test_cases'][index];
                   return Card(
                     margin: EdgeInsets.symmetric(vertical: 8),
                     child: Padding(
@@ -247,11 +277,12 @@ public class Main {
             Text("Difficulty",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             SizedBox(height: 8),
-            Text(widget.question['difficulty'], style: TextStyle(fontSize: 16)),
+            Text(widget.codingQuestion['difficulty'],
+                style: TextStyle(fontSize: 16)),
             SizedBox(height: 16),
             Text("Hello"),
-            if (widget.question['solutions'] != null &&
-                widget.question['solutions'].isNotEmpty)
+            if (widget.codingQuestion['solutions'] != null &&
+                widget.codingQuestion['solutions'].isNotEmpty)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -260,9 +291,10 @@ public class Main {
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   ...List<Widget>.generate(
-                    widget.question['solutions'].length,
+                    widget.codingQuestion['solutions'].length,
                     (index) {
-                      final solution = widget.question['solutions'][index];
+                      final solution =
+                          widget.codingQuestion['solutions'][index];
                       return Card(
                         margin: EdgeInsets.symmetric(vertical: 8),
                         child: Padding(
@@ -388,20 +420,84 @@ public class Main {
                 //   ],
                 // ),
 
+                // DropdownButton<String>(
+                //   value: _selectedLanguage,
+                //   onChanged: (String? newValue) {
+                //     if (newValue != null &&
+                //         newValue != "Please select a Language") {
+                //       if (_selectedLanguage != "Please select a Language") {
+                //         // Show alert if a language was previously selected
+                //         showDialog(
+                //           context: context,
+                //           builder: (BuildContext context) {
+                //             return AlertDialog(
+                //               title: Text("Change Language"),
+                //               content: Text(
+                //                   "Changing the language will remove the current code. Do you want to proceed?"),
+                //               actions: [
+                //                 TextButton(
+                //                   child: Text("Cancel"),
+                //                   onPressed: () {
+                //                     Navigator.of(context)
+                //                         .pop(); // Close the dialog
+                //                   },
+                //                 ),
+                //                 TextButton(
+                //                   child: Text("Proceed"),
+                //                   onPressed: () {
+                //                     // Proceed with changing the language and setting starter code
+                //                     setState(() {
+                //                       _selectedLanguage = newValue;
+                //                       _setStarterCode(newValue);
+                //                     });
+                //                     Navigator.of(context)
+                //                         .pop(); // Close the dialog
+                //                   },
+                //                 ),
+                //               ],
+                //             );
+                //           },
+                //         );
+                //       } else {
+                //         // Directly set language and starter code if no language was selected previously
+                //         setState(() {
+                //           _selectedLanguage = newValue;
+                //           _setStarterCode(newValue);
+                //         });
+                //       }
+                //     }
+                //   },
+                //   items: [
+                //     DropdownMenuItem<String>(
+                //       value: "Please select a Language",
+                //       child: Text("Please select a Language"),
+                //     ),
+                //     ...widget.codingQuestion['allowed_languages']
+                //         .cast<String>()
+                //         .map<DropdownMenuItem<String>>((String language) {
+                //       return DropdownMenuItem<String>(
+                //         value: language,
+                //         child: Text(language),
+                //       );
+                //     }).toList(),
+                //   ],
+                // ),
+
                 DropdownButton<String>(
                   value: _selectedLanguage,
                   onChanged: (String? newValue) {
                     if (newValue != null &&
                         newValue != "Please select a Language") {
                       if (_selectedLanguage != "Please select a Language") {
-                        // Show alert if a language was previously selected
+                        // Show confirmation dialog if a language was previously selected
                         showDialog(
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
                               title: Text("Change Language"),
                               content: Text(
-                                  "Changing the language will remove the current code. Do you want to proceed?"),
+                                "Changing the language will remove the current code. Do you want to proceed?",
+                              ),
                               actions: [
                                 TextButton(
                                   child: Text("Cancel"),
@@ -413,10 +509,11 @@ public class Main {
                                 TextButton(
                                   child: Text("Proceed"),
                                   onPressed: () {
-                                    // Proceed with changing the language and setting starter code
+                                    // Change language and set starter code
                                     setState(() {
                                       _selectedLanguage = newValue;
-                                      _setStarterCode(newValue);
+                                      _setStarterCode(
+                                          newValue); // Function to set starter code
                                     });
                                     Navigator.of(context)
                                         .pop(); // Close the dialog
@@ -427,10 +524,11 @@ public class Main {
                           },
                         );
                       } else {
-                        // Directly set language and starter code if no language was selected previously
+                        // Directly set the language if none was selected previously
                         setState(() {
                           _selectedLanguage = newValue;
-                          _setStarterCode(newValue);
+                          _setStarterCode(
+                              newValue); // Function to set starter code
                         });
                       }
                     }
@@ -440,9 +538,10 @@ public class Main {
                       value: "Please select a Language",
                       child: Text("Please select a Language"),
                     ),
-                    ...widget.question['allowed_languages']
-                        .cast<String>()
-                        .map<DropdownMenuItem<String>>((String language) {
+                    // Dynamically generate dropdown items based on allowed_languages
+                    ...?widget.codingQuestion['allowed_languages']
+                        ?.cast<String>()
+                        ?.map<DropdownMenuItem<String>>((String language) {
                       return DropdownMenuItem<String>(
                         value: language,
                         child: Text(language),
@@ -643,111 +742,111 @@ public class Main {
           //   ],
           // ),
 
-          DropdownButton<String>(
-            value: _selectedLanguage,
-            onChanged: (String? newValue) {
-              if (newValue != null && newValue != "Please select a Language") {
-                if (_selectedLanguage != "Please select a Language") {
-                  // Show alert if a language was previously selected
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text("Change Language"),
-                        content: Text(
-                            "Changing the language will remove the current code. Do you want to proceed?"),
-                        actions: [
-                          TextButton(
-                            child: Text("Cancel"),
-                            onPressed: () {
-                              Navigator.of(context).pop(); // Close the dialog
-                            },
-                          ),
-                          TextButton(
-                            child: Text("Proceed"),
-                            onPressed: () {
-                              // Proceed with changing the language and setting starter code
-                              setState(() {
-                                _selectedLanguage = newValue;
-                                _setStarterCode(newValue);
-                              });
-                              Navigator.of(context).pop(); // Close the dialog
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                } else {
-                  // Directly set language and starter code if no language was selected previously
-                  setState(() {
-                    _selectedLanguage = newValue;
-                    _setStarterCode(newValue);
-                  });
-                }
-              }
-            },
-            items: [
-              DropdownMenuItem<String>(
-                value: "Please select a Language",
-                child: Text("Please select a Language"),
-              ),
-              ...widget.question['allowed_languages']
-                  .cast<String>()
-                  .map<DropdownMenuItem<String>>((String language) {
-                return DropdownMenuItem<String>(
-                  value: language,
-                  child: Text(language),
-                );
-              }).toList(),
-            ],
-          ),
+          // DropdownButton<String>(
+          //   value: _selectedLanguage,
+          //   onChanged: (String? newValue) {
+          //     if (newValue != null && newValue != "Please select a Language") {
+          //       if (_selectedLanguage != "Please select a Language") {
+          //         // Show alert if a language was previously selected
+          //         showDialog(
+          //           context: context,
+          //           builder: (BuildContext context) {
+          //             return AlertDialog(
+          //               title: Text("Change Language"),
+          //               content: Text(
+          //                   "Changing the language will remove the current code. Do you want to proceed?"),
+          //               actions: [
+          //                 TextButton(
+          //                   child: Text("Cancel"),
+          //                   onPressed: () {
+          //                     Navigator.of(context).pop(); // Close the dialog
+          //                   },
+          //                 ),
+          //                 TextButton(
+          //                   child: Text("Proceed"),
+          //                   onPressed: () {
+          //                     // Proceed with changing the language and setting starter code
+          //                     setState(() {
+          //                       _selectedLanguage = newValue;
+          //                       _setStarterCode(newValue);
+          //                     });
+          //                     Navigator.of(context).pop(); // Close the dialog
+          //                   },
+          //                 ),
+          //               ],
+          //             );
+          //           },
+          //         );
+          //       } else {
+          //         // Directly set language and starter code if no language was selected previously
+          //         setState(() {
+          //           _selectedLanguage = newValue;
+          //           _setStarterCode(newValue);
+          //         });
+          //       }
+          //     }
+          //   },
+          //   items: [
+          //     DropdownMenuItem<String>(
+          //       value: "Please select a Language",
+          //       child: Text("Please select a Language"),
+          //     ),
+          //     ...widget.codingQuestion['allowed_languages']
+          //         .cast<String>()
+          //         .map<DropdownMenuItem<String>>((String language) {
+          //       return DropdownMenuItem<String>(
+          //         value: language,
+          //         child: Text(language),
+          //       );
+          //     }).toList(),
+          //   ],
+          // ),
 
-          Expanded(
-            child: Focus(
-              focusNode: _focusNode, // Attach the focus node to Focus only
-              onKeyEvent: (FocusNode node, KeyEvent keyEvent) {
-                if (keyEvent is KeyDownEvent) {
-                  final keysPressed =
-                      HardwareKeyboard.instance.logicalKeysPressed;
+          // Expanded(
+          //   child: Focus(
+          //     focusNode: _focusNode, // Attach the focus node to Focus only
+          //     onKeyEvent: (FocusNode node, KeyEvent keyEvent) {
+          //       if (keyEvent is KeyDownEvent) {
+          //         final keysPressed =
+          //             HardwareKeyboard.instance.logicalKeysPressed;
 
-                  // Check for Ctrl + / shortcut
-                  if (keysPressed.contains(LogicalKeyboardKey.controlLeft) &&
-                      keysPressed.contains(LogicalKeyboardKey.slash)) {
-                    _commentSelectedLines();
-                    return KeyEventResult.handled;
-                  }
-                }
-                return KeyEventResult.ignored;
-              },
-              child: Container(
-                // height: 200,
-                height: MediaQuery.of(context).size.height / 3.5,
-                child: CodeField(
-                  controller: _codeController,
-                  focusNode: FocusNode(),
-                  textStyle: TextStyle(
-                    fontFamily: 'RobotoMono',
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                  cursorColor: Colors.white,
-                  background: Colors.black,
-                  expands: true,
-                  wrap: false,
-                  lineNumberStyle: LineNumberStyle(
-                    width: 40,
-                    margin: 8,
-                    textStyle: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 16,
-                    ),
-                    background: Colors.grey.shade900,
-                  ),
-                ),
-              ),
-            ),
-          ),
+          //         // Check for Ctrl + / shortcut
+          //         if (keysPressed.contains(LogicalKeyboardKey.controlLeft) &&
+          //             keysPressed.contains(LogicalKeyboardKey.slash)) {
+          //           _commentSelectedLines();
+          //           return KeyEventResult.handled;
+          //         }
+          //       }
+          //       return KeyEventResult.ignored;
+          //     },
+          //     child: Container(
+          //       // height: 200,
+          //       height: MediaQuery.of(context).size.height / 3.5,
+          //       child: CodeField(
+          //         controller: _codeController,
+          //         focusNode: FocusNode(),
+          //         textStyle: TextStyle(
+          //           fontFamily: 'RobotoMono',
+          //           fontSize: 16,
+          //           color: Colors.white,
+          //         ),
+          //         cursorColor: Colors.white,
+          //         background: Colors.black,
+          //         expands: true,
+          //         wrap: false,
+          //         lineNumberStyle: LineNumberStyle(
+          //           width: 40,
+          //           margin: 8,
+          //           textStyle: TextStyle(
+          //             color: Colors.grey.shade600,
+          //             fontSize: 16,
+          //           ),
+          //           background: Colors.grey.shade900,
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
@@ -852,7 +951,7 @@ public class Main {
         ];
       } else if (allTestCases) {
         // All test cases
-        testCases = widget.question['test_cases']
+        testCases = widget.codingQuestion['test_cases']
             .map<Map<String, String>>((testCase) => {
                   'input': testCase['input'].toString().trim() + '\n',
                   'output': testCase['output'].toString().trim(),
@@ -860,7 +959,7 @@ public class Main {
             .toList();
       } else {
         // Only public test cases
-        testCases = widget.question['test_cases']
+        testCases = widget.codingQuestion['test_cases']
             .where((testCase) => testCase['is_public'] == true)
             .map<Map<String, String>>((testCase) => {
                   'input': testCase['input'].toString().trim() + '\n',
@@ -908,21 +1007,21 @@ public class Main {
 
         // Only send to backend for "submit" mode
         if (mode == "submit") {
-          final questionPoints =
-              _getPointsForDifficulty(widget.question["difficulty"] ?? '');
+          final questionPoints = _getPointsForDifficulty(
+              widget.codingQuestion["difficulty"] ?? '');
 
           final backendRequest = {
-            "domain_id": widget.question["codingquestiondomain_id"],
-            "question_id": widget.question["id"],
+            "domain_id": widget.codingQuestion["codingquestiondomain_id"],
+            "question_id": widget.codingQuestion["id"],
             "language": _selectedLanguage,
             "solution_code": code,
             "test_results": responseBody,
             "question_points": questionPoints,
             "mode": mode,
           };
-          print("[DEBUG] Question Object: ${widget.question}");
+          print("[DEBUG] Question Object: ${widget.codingQuestion}");
 
-          if (widget.question["codingquestiondomain_id"] == null) {
+          if (widget.codingQuestion["codingquestiondomain_id"] == null) {
             print("[DEBUG] Missing domain_id in question object");
             return;
           }
@@ -1080,41 +1179,41 @@ public class Main {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(widget.question['title'],
+                        Text(widget.codingQuestion['title'],
                             style: const TextStyle(
                                 fontSize: 24, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 16),
                         const Text("Description",
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold)),
-                        Text(widget.question['description'],
+                        Text(widget.codingQuestion['description'],
                             style: TextStyle(fontSize: 16)),
                         const SizedBox(height: 16),
                         const Text("Input Format",
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold)),
-                        Text(widget.question['input_format'],
+                        Text(widget.codingQuestion['input_format'],
                             style: TextStyle(fontSize: 16)),
                         SizedBox(height: 16),
                         const Text("Output Format",
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold)),
-                        Text(widget.question['output_format'],
+                        Text(widget.codingQuestion['output_format'],
                             style: TextStyle(fontSize: 16)),
                         SizedBox(height: 16),
                         const Text("Constraints",
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold)),
-                        Text(widget.question['constraints'],
+                        Text(widget.codingQuestion['constraints'],
                             style: TextStyle(fontSize: 16)),
                         SizedBox(height: 8),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: List<Widget>.generate(
-                            widget.question['test_cases'].length,
+                            widget.codingQuestion['test_cases'].length,
                             (index) {
                               final testCase =
-                                  widget.question['test_cases'][index];
+                                  widget.codingQuestion['test_cases'][index];
                               return Card(
                                 margin: EdgeInsets.symmetric(vertical: 8),
                                 child: Padding(
@@ -1143,11 +1242,11 @@ public class Main {
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold)),
                         SizedBox(height: 8),
-                        Text(widget.question['difficulty'],
+                        Text(widget.codingQuestion['difficulty'],
                             style: TextStyle(fontSize: 16)),
                         SizedBox(height: 16),
-                        if (widget.question['solutions'] != null &&
-                            widget.question['solutions'].isNotEmpty)
+                        if (widget.codingQuestion['solutions'] != null &&
+                            widget.codingQuestion['solutions'].isNotEmpty)
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -1157,10 +1256,10 @@ public class Main {
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold)),
                               ...List<Widget>.generate(
-                                widget.question['solutions'].length,
+                                widget.codingQuestion['solutions'].length,
                                 (index) {
                                   final solution =
-                                      widget.question['solutions'][index];
+                                      widget.codingQuestion['solutions'][index];
                                   return Card(
                                     margin: EdgeInsets.symmetric(vertical: 8),
                                     child: Padding(
@@ -1271,6 +1370,7 @@ public class Main {
                   ),
                 ),
               ),
+
               Expanded(child: codefieldbox()),
             ],
           );
@@ -1279,18 +1379,45 @@ public class Main {
     );
   }
 
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Card(
+  //     margin: const EdgeInsets.all(8.0),
+  //     child: Padding(
+  //       padding: const EdgeInsets.all(16.0),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           Text('Title: ${widget.codingQuestion['title']}',
+  //               style:
+  //                   const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+  //           const SizedBox(height: 8),
+  //           Text('Description: ${widget.codingQuestion['description']}'),
+  //           const SizedBox(height: 8),
+  //           Text('Input Format: ${widget.codingQuestion['input_format']}'),
+  //           const SizedBox(height: 8),
+  //           Text('Output Format: ${widget.codingQuestion['output_format']}'),
+  //           const SizedBox(height: 8),
+  //           Text('Constraints: ${widget.codingQuestion['constraints']}'),
+  //           const SizedBox(height: 8),
+  //           Text('Difficulty: ${widget.codingQuestion['difficulty']}'),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
   @override
   Widget build(BuildContext context) {
     final bool isMobile = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context, true); // Return true if changes are made
-            },
-            icon: Icon(Icons.arrow_back)),
-        title: Text(widget.question['title']),
+        // leading: IconButton(
+        //     onPressed: () {
+        //       Navigator.pop(context, true); // Return true if changes are made
+        //     },
+        //     icon: Icon(Icons.arrow_back)),
+        title: Text(widget.codingQuestion['title']),
         bottom: isMobile
             ? TabBar(controller: _tabController, tabs: [
                 Tab(text: "Question"),
