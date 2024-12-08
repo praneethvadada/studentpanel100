@@ -112,7 +112,6 @@ class _CodingQuestionWidgetState extends State<CodingQuestionWidget>
 //     _codeController.text = starterCode;
 //   }
 
-
   void _setStarterCode(String language) {
     String starterCode;
 
@@ -864,13 +863,503 @@ int main() {
         0; // Default to 0 if difficulty is unknown
   }
 
+  // Future<void> _runCode({
+  //   required bool allTestCases,
+  //   String? customInput,
+  //   required String mode, // Add mode parameter to differentiate actions
+  // }) async {
+  //   try {
+  //     // Ensure a language is selected and code is provided
+  //     if (_selectedLanguage == null ||
+  //         _selectedLanguage == "Please select a Language") {
+  //       print("[DEBUG] No valid language selected");
+  //       setState(() {
+  //         testResults = [
+  //           TestCaseResult(
+  //             testCase: '',
+  //             expectedResult: '',
+  //             actualResult: '',
+  //             passed: false,
+  //             errorMessage: "Please select a programming language.",
+  //           ),
+  //         ];
+  //       });
+  //       return;
+  //     }
+  //     if (_codeController.text.trim().isEmpty) {
+  //       print("[DEBUG] Code editor is empty");
+  //       setState(() {
+  //         testResults = [
+  //           TestCaseResult(
+  //             testCase: '',
+  //             expectedResult: '',
+  //             actualResult: '',
+  //             passed: false,
+  //             errorMessage: "Please provide some code.",
+  //           ),
+  //         ];
+  //       });
+  //       return;
+  //     }
+  //     // Determine the endpoint URL based on the selected language
+  //     Uri endpoint;
+  //     switch (_selectedLanguage!.toLowerCase()) {
+  //       case 'python':
+  //         endpoint = Uri.parse('http://localhost:8084/compile');
+  //         break;
+  //       case 'java':
+  //         endpoint = Uri.parse('http://145.223.22.18:5001/run-java');
+  //         break;
+  //       case 'cpp':
+  //         endpoint = Uri.parse('http://localhost:8081/compile');
+  //         break;
+  //       case 'c':
+  //         endpoint = Uri.parse('http://localhost:8082/compile');
+  //         break;
+  //       default:
+  //         print("[DEBUG] Unsupported language selected: $_selectedLanguage");
+  //         setState(() {
+  //           testResults = [
+  //             TestCaseResult(
+  //               testCase: '',
+  //               expectedResult: '',
+  //               actualResult: '',
+  //               passed: false,
+  //               errorMessage: "Unsupported programming language selected.",
+  //             ),
+  //           ];
+  //         });
+  //         return;
+  //     }
+  //     print("[DEBUG] Selected Endpoint: $endpoint");
+  //     // Prepare code and test cases
+  //     final String code = _codeController.text.trim();
+  //     List<Map<String, String>> testCases;
+  //     if (customInput != null) {
+  //       // Custom input provided by the user
+  //       testCases = [
+  //         {
+  //           'input': customInput.trim() + '\n',
+  //           'output': '', // Custom input doesn't have an expected output
+  //         },
+  //       ];
+  //     } else if (allTestCases) {
+  //       // All test cases
+  //       testCases = widget.codingQuestion['test_cases']
+  //           .map<Map<String, String>>((testCase) => {
+  //                 'input': testCase['input'].toString().trim() + '\n',
+  //                 'output': testCase['output'].toString().trim(),
+  //               })
+  //           .toList();
+  //     } else {
+  //       // Only public test cases
+  //       testCases = widget.codingQuestion['test_cases']
+  //           .where((testCase) => testCase['is_public'] == true)
+  //           .map<Map<String, String>>((testCase) => {
+  //                 'input': testCase['input'].toString().trim() + '\n',
+  //                 'output': testCase['output'].toString().trim(),
+  //               })
+  //           .toList();
+  //     }
+  //     final Map<String, dynamic> requestBody = {
+  //       'language': _selectedLanguage!.toLowerCase(),
+  //       'code': code,
+  //       'testcases': testCases,
+  //       'is_custom_input': customInput != null,
+  //       'mode': mode, // Use the passed mode
+  //     };
+  //     print("[DEBUG] Request Body: ${jsonEncode(requestBody)}");
+  //     // Send request to the compiler
+  //     final response = await http.post(
+  //       endpoint,
+  //       headers: {'Content-Type': 'application/json'},
+  //       body: jsonEncode(requestBody),
+  //     );
+  //     print("[DEBUG] Response Status Code: ${response.statusCode}");
+  //     if (response.statusCode == 200) {
+  //       print("[DEBUG] Response Body: ${response.body}");
+  //       final List<dynamic> responseBody = jsonDecode(response.body);
+  //       // Update test results in the UI
+  //       setState(() {
+  //         testResults = responseBody.map<TestCaseResult>((result) {
+  //           return TestCaseResult(
+  //             testCase: result['input'] ?? '',
+  //             expectedResult: result['expected_output'] ?? '',
+  //             actualResult: result['actual_output'] ?? '',
+  //             passed: result['success'] ?? false,
+  //             errorMessage: result['error'] ?? '',
+  //             isCustomInput: customInput != null,
+  //           );
+  //         }).toList();
+  //       });
+  //       // Only send to backend for "submit" mode
+  //       if (mode == "submit") {
+  //         final questionPoints = _getPointsForDifficulty(
+  //             widget.codingQuestion["difficulty"] ?? '');
+  //         final backendRequest = {
+  //           "domain_id": widget.codingQuestion["codingquestiondomain_id"],
+  //           "question_id": widget.codingQuestion["id"],
+  //           "language": _selectedLanguage,
+  //           "solution_code": code,
+  //           "test_results": responseBody,
+  //           "question_points": questionPoints,
+  //           "mode": mode,
+  //         };
+  //         print("[DEBUG] Question Object: ${widget.codingQuestion}");
+  //         if (widget.codingQuestion["codingquestiondomain_id"] == null) {
+  //           print("[DEBUG] Missing domain_id in question object");
+  //           return;
+  //         }
+  //         print(
+  //             "[DEBUG] Backend Requesttttttttt Payload: ${jsonEncode(backendRequest)}");
+  //         final token = await SharedPrefs.getToken();
+  //         final backendResponse = await http.post(
+  //           Uri.parse(
+  //               "http://localhost:3000/students/practice-coding-question-submit"),
+  //           headers: {
+  //             'Content-Type': 'application/json',
+  //             "Authorization": "Bearer $token",
+  //           },
+  //           body: jsonEncode(backendRequest),
+  //         );
+  //         print(
+  //             "[DEBUG] Backend Response: ${backendResponse.statusCode} - ${backendResponse.body}");
+  //         if (backendResponse.statusCode != 201) {
+  //           print("[DEBUG] Backend Submission Error: ${backendResponse.body}");
+  //         }
+  //       }
+  //       _scrollToResults();
+  //     } else {
+  //       print("[DEBUG] Error Response Body: ${response.body}");
+  //       final errorResponse = jsonDecode(response.body);
+  //       setState(() {
+  //         testResults = [
+  //           TestCaseResult(
+  //             testCase: '',
+  //             expectedResult: '',
+  //             actualResult: '',
+  //             passed: false,
+  //             errorMessage:
+  //                 errorResponse['message'] ?? 'Compilation error occurred',
+  //           ),
+  //         ];
+  //       });
+  //     }
+  //   } catch (error) {
+  //     print("[DEBUG] HTTP Request Error: $error");
+  //     setState(() {
+  //       testResults = [
+  //         TestCaseResult(
+  //           testCase: '',
+  //           expectedResult: '',
+  //           actualResult: '',
+  //           passed: false,
+  //           errorMessage: "Failed to connect to the server. Please try again.",
+  //         ),
+  //       ];
+  //     });
+  //   }
+  // }
+
+  // Future<void> _runCode({
+  //   required bool allTestCases,
+  //   String? customInput,
+  //   required String mode, // "run" or "submit"
+  // }) async {
+  //   try {
+  //     // Validate language selection
+  //     if (_selectedLanguage == null ||
+  //         _selectedLanguage == "Please select a Language") {
+  //       print("[DEBUG] No valid language selected");
+  //       setState(() {
+  //         testResults = [
+  //           TestCaseResult(
+  //             testCase: '',
+  //             expectedResult: '',
+  //             actualResult: '',
+  //             passed: false,
+  //             errorMessage: "Please select a programming language.",
+  //           ),
+  //         ];
+  //       });
+  //       return;
+  //     }
+  //     // Validate code input
+  //     if (_codeController.text.trim().isEmpty) {
+  //       print("[DEBUG] Code editor is empty");
+  //       setState(() {
+  //         testResults = [
+  //           TestCaseResult(
+  //             testCase: '',
+  //             expectedResult: '',
+  //             actualResult: '',
+  //             passed: false,
+  //             errorMessage: "Please provide some code.",
+  //           ),
+  //         ];
+  //       });
+  //       return;
+  //     }
+
+  //     print("[DEBUG] Preparing Request");
+
+  //     // Prepare test cases
+  //     final String code = _codeController.text.trim();
+  //     List<Map<String, String>> testCases;
+
+  //     if (customInput != null) {
+  //       // Custom input provided by the user
+  //       testCases = [
+  //         {
+  //           'input': customInput.trim() + '\n',
+  //           'output': '', // Custom input doesn't have an expected output
+  //         },
+  //       ];
+  //     } else if (allTestCases) {
+  //       // All test cases
+  //       testCases = widget.codingQuestion['test_cases']
+  //           .map<Map<String, String>>((testCase) => {
+  //                 'input': testCase['input'].toString().trim() + '\n',
+  //                 'output': testCase['output'].toString().trim(),
+  //               })
+  //           .toList();
+  //     } else {
+  //       // Only public test cases
+  //       testCases = widget.codingQuestion['test_cases']
+  //           .where((testCase) => testCase['is_public'] == true)
+  //           .map<Map<String, String>>((testCase) => {
+  //                 'input': testCase['input'].toString().trim() + '\n',
+  //                 'output': testCase['output'].toString().trim(),
+  //               })
+  //           .toList();
+  //     }
+
+  //     final Map<String, dynamic> requestBody = {
+  //       'language': _selectedLanguage!.toLowerCase(),
+  //       'solution_code': code,
+  //       'testcases': testCases,
+  //       'round_id': widget.codingQuestion['round_id'], // Use round_id
+  //       'question_id': widget.codingQuestion['id'],
+  //       'mode': mode, // Run or Submit
+  //     };
+
+  //     print("[DEBUG] Request Body: ${jsonEncode(requestBody)}");
+
+  //     final token = await SharedPrefs.getToken();
+  //     final backendEndpoint = Uri.parse(
+  //       "http://localhost:3000/assessments/assessment-coding-question-submit",
+  //     );
+
+  //     // Send request to the backend
+  //     final response = await http.post(
+  //       backendEndpoint,
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         "Authorization": "Bearer $token",
+  //       },
+  //       body: jsonEncode(requestBody),
+  //     );
+
+  //     print("[DEBUG] Response Status Code: ${response.statusCode}");
+
+  //     if (response.statusCode == 200 || response.statusCode == 201) {
+  //       final Map<String, dynamic> responseBody = jsonDecode(response.body);
+
+  //       if (mode == "run") {
+  //         // Update test results for "run" mode
+  //         setState(() {
+  //           testResults = (responseBody['test_results'] as List<dynamic>)
+  //               .map<TestCaseResult>((result) {
+  //             return TestCaseResult(
+  //               testCase: result['input'] ?? '',
+  //               expectedResult: result['expected_output'] ?? '',
+  //               actualResult: result['actual_output'] ?? '',
+  //               passed: result['success'] ?? false,
+  //               errorMessage: result['error'] ?? '',
+  //               isCustomInput: customInput != null,
+  //             );
+  //           }).toList();
+  //         });
+
+  //         print("[DEBUG] Test Results Updated");
+  //       } else if (mode == "submit") {
+  //         // Handle response for "submit" mode
+  //         final submission = responseBody['submission'];
+  //         print("[DEBUG] Submission Successful: $submission");
+  //         setState(() {
+  //           testResults = (responseBody['test_results'] as List<dynamic>)
+  //               .map<TestCaseResult>((result) {
+  //             return TestCaseResult(
+  //               testCase: result['input'] ?? '',
+  //               expectedResult: result['expected_output'] ?? '',
+  //               actualResult: result['actual_output'] ?? '',
+  //               passed: result['success'] ?? false,
+  //               errorMessage: result['error'] ?? '',
+  //               isCustomInput: customInput != null,
+  //             );
+  //           }).toList();
+  //         });
+  //       }
+  //     } else {
+  //       // Handle non-success responses
+  //       final errorResponse = jsonDecode(response.body);
+  //       setState(() {
+  //         testResults = [
+  //           TestCaseResult(
+  //             testCase: '',
+  //             expectedResult: '',
+  //             actualResult: '',
+  //             passed: false,
+  //             errorMessage:
+  //                 errorResponse['message'] ?? 'Unexpected error occurred',
+  //           ),
+  //         ];
+  //       });
+  //     }
+  //   } catch (error) {
+  //     // Handle request errors
+  //     print("[DEBUG] HTTP Request Error: $error");
+  //     setState(() {
+  //       testResults = [
+  //         TestCaseResult(
+  //           testCase: '',
+  //           expectedResult: '',
+  //           actualResult: '',
+  //           passed: false,
+  //           errorMessage: "Failed to connect to the server. Please try again.",
+  //         ),
+  //       ];
+  //     });
+  //   }
+  // }
+
+  // Future<void> _runCode({
+  //   required bool allTestCases,
+  //   String? customInput,
+  //   required String mode, // "run" or "submit"
+  // }) async {
+  //   try {
+  //     // Validate language selection
+  //     if (_selectedLanguage == null ||
+  //         _selectedLanguage == "Please select a Language") {
+  //       print("[DEBUG] No valid language selected");
+  //       setState(() {
+  //         testResults = [
+  //           TestCaseResult(
+  //             testCase: '',
+  //             expectedResult: '',
+  //             actualResult: '',
+  //             passed: false,
+  //             errorMessage: "Please select a programming language.",
+  //           ),
+  //         ];
+  //       });
+  //       return;
+  //     }
+
+  //     // Validate code input
+  //     if (_codeController.text.trim().isEmpty) {
+  //       print("[DEBUG] Code editor is empty");
+  //       setState(() {
+  //         testResults = [
+  //           TestCaseResult(
+  //             testCase: '',
+  //             expectedResult: '',
+  //             actualResult: '',
+  //             passed: false,
+  //             errorMessage: "Please provide some code.",
+  //           ),
+  //         ];
+  //       });
+  //       return;
+  //     }
+
+  //     if (widget.codingQuestion['round_id'] == null ||
+  //         widget.codingQuestion['id'] == null) {
+  //       print("[DEBUG] Missing round_id or question_id");
+  //       setState(() {
+  //         testResults = [
+  //           TestCaseResult(
+  //             testCase: '',
+  //             expectedResult: '',
+  //             actualResult: '',
+  //             passed: false,
+  //             errorMessage: "Invalid question data.",
+  //           ),
+  //         ];
+  //       });
+  //       return;
+  //     }
+
+  //     // Prepare test cases
+  //     final String code = _codeController.text.trim();
+  //     List<Map<String, String>> testCases;
+
+  //     if (customInput != null) {
+  //       testCases = [
+  //         {
+  //           'input': customInput.trim() + '\n',
+  //           'output': '', // Custom input doesn't have an expected output
+  //         },
+  //       ];
+  //     } else if (allTestCases) {
+  //       testCases = widget.codingQuestion['test_cases']
+  //           .map<Map<String, String>>((testCase) => {
+  //                 'input': testCase['input'].toString().trim() + '\n',
+  //                 'output': testCase['output'].toString().trim(),
+  //               })
+  //           .toList();
+  //     } else {
+  //       testCases = widget.codingQuestion['test_cases']
+  //           .where((testCase) => testCase['is_public'] == true)
+  //           .map<Map<String, String>>((testCase) => {
+  //                 'input': testCase['input'].toString().trim() + '\n',
+  //                 'output': testCase['output'].toString().trim(),
+  //               })
+  //           .toList();
+  //     }
+
+  //     final requestBody = {
+  //       'language': _selectedLanguage!.toLowerCase(),
+  //       'solution_code': code,
+  //       'testcases': testCases,
+  //       'round_id': widget.codingQuestion['round_id'],
+  //       'question_id': widget.codingQuestion['id'],
+  //       'mode': mode,
+  //     };
+
+  //     final token = await SharedPrefs.getToken();
+  //     final response = await http.post(
+  //       Uri.parse(
+  //           "http://localhost:3000/assessments/assessment-coding-question-submit"),
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         "Authorization": "Bearer $token",
+  //       },
+  //       body: jsonEncode(requestBody),
+  //     );
+
+  //     if (response.statusCode == 200 || response.statusCode == 201) {
+  //       final responseBody = jsonDecode(response.body);
+  //       print("[DEBUG] Response Body: $responseBody");
+  //       // Handle response here
+  //     } else {
+  //       print("[DEBUG] Error Response: ${response.body}");
+  //     }
+  //   } catch (error) {
+  //     print("[DEBUG] Error: $error");
+  //   }
+  // }
+
   Future<void> _runCode({
     required bool allTestCases,
     String? customInput,
-    required String mode, // Add mode parameter to differentiate actions
+    required String mode, // "run" or "submit"
   }) async {
     try {
-      // Ensure a language is selected and code is provided
+      print("[DEBUG] Starting _runCode with mode: $mode");
+
+      // Validate language selection
       if (_selectedLanguage == null ||
           _selectedLanguage == "Please select a Language") {
         print("[DEBUG] No valid language selected");
@@ -888,6 +1377,7 @@ int main() {
         return;
       }
 
+      // Validate code input
       if (_codeController.text.trim().isEmpty) {
         print("[DEBUG] Code editor is empty");
         setState(() {
@@ -904,45 +1394,32 @@ int main() {
         return;
       }
 
-      // Determine the endpoint URL based on the selected language
-      Uri endpoint;
-      switch (_selectedLanguage!.toLowerCase()) {
-        case 'python':
-          endpoint = Uri.parse('http://localhost:8084/compile');
-          break;
-        case 'java':
-          endpoint = Uri.parse('http://145.223.22.18:5001/run-java');
-          break;
-        case 'cpp':
-          endpoint = Uri.parse('http://localhost:8081/compile');
-          break;
-        case 'c':
-          endpoint = Uri.parse('http://localhost:8082/compile');
-          break;
-        default:
-          print("[DEBUG] Unsupported language selected: $_selectedLanguage");
-          setState(() {
-            testResults = [
-              TestCaseResult(
-                testCase: '',
-                expectedResult: '',
-                actualResult: '',
-                passed: false,
-                errorMessage: "Unsupported programming language selected.",
-              ),
-            ];
-          });
-          return;
+      // Validate question data
+      print("[DEBUG] Validating question data");
+      if (widget.codingQuestion['round_id'] == null ||
+          widget.codingQuestion['id'] == null) {
+        print("[DEBUG] Missing round_id or question_id in codingQuestion");
+        setState(() {
+          testResults = [
+            TestCaseResult(
+              testCase: '',
+              expectedResult: '',
+              actualResult: '',
+              passed: false,
+              errorMessage: "Invalid question data.",
+            ),
+          ];
+        });
+        return;
       }
 
-      print("[DEBUG] Selected Endpoint: $endpoint");
-
-      // Prepare code and test cases
+      // Prepare test cases
+      print("[DEBUG] Preparing test cases");
       final String code = _codeController.text.trim();
       List<Map<String, String>> testCases;
 
       if (customInput != null) {
-        // Custom input provided by the user
+        print("[DEBUG] Custom input provided");
         testCases = [
           {
             'input': customInput.trim() + '\n',
@@ -950,7 +1427,7 @@ int main() {
           },
         ];
       } else if (allTestCases) {
-        // All test cases
+        print("[DEBUG] Using all test cases");
         testCases = widget.codingQuestion['test_cases']
             .map<Map<String, String>>((testCase) => {
                   'input': testCase['input'].toString().trim() + '\n',
@@ -958,7 +1435,7 @@ int main() {
                 })
             .toList();
       } else {
-        // Only public test cases
+        print("[DEBUG] Using public test cases");
         testCases = widget.codingQuestion['test_cases']
             .where((testCase) => testCase['is_public'] == true)
             .map<Map<String, String>>((testCase) => {
@@ -968,117 +1445,40 @@ int main() {
             .toList();
       }
 
-      final Map<String, dynamic> requestBody = {
+      final requestBody = {
         'language': _selectedLanguage!.toLowerCase(),
-        'code': code,
+        'solution_code': code,
         'testcases': testCases,
-        'is_custom_input': customInput != null,
-        'mode': mode, // Use the passed mode
+        'round_id': widget.codingQuestion['round_id'],
+        'question_id': widget.codingQuestion['id'],
+        'mode': mode, // "run" or "submit"
       };
 
       print("[DEBUG] Request Body: ${jsonEncode(requestBody)}");
 
-      // Send request to the compiler
+      final token = await SharedPrefs.getToken();
+      print("[DEBUG] Token retrieved: $token");
+
       final response = await http.post(
-        endpoint,
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse(
+            "http://localhost:3000/assessments/assessment-coding-question-submit"),
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer $token",
+        },
         body: jsonEncode(requestBody),
       );
 
       print("[DEBUG] Response Status Code: ${response.statusCode}");
 
-      if (response.statusCode == 200) {
-        print("[DEBUG] Response Body: ${response.body}");
-        final List<dynamic> responseBody = jsonDecode(response.body);
-
-        // Update test results in the UI
-        setState(() {
-          testResults = responseBody.map<TestCaseResult>((result) {
-            return TestCaseResult(
-              testCase: result['input'] ?? '',
-              expectedResult: result['expected_output'] ?? '',
-              actualResult: result['actual_output'] ?? '',
-              passed: result['success'] ?? false,
-              errorMessage: result['error'] ?? '',
-              isCustomInput: customInput != null,
-            );
-          }).toList();
-        });
-
-        // Only send to backend for "submit" mode
-        if (mode == "submit") {
-          final questionPoints = _getPointsForDifficulty(
-              widget.codingQuestion["difficulty"] ?? '');
-
-          final backendRequest = {
-            "domain_id": widget.codingQuestion["codingquestiondomain_id"],
-            "question_id": widget.codingQuestion["id"],
-            "language": _selectedLanguage,
-            "solution_code": code,
-            "test_results": responseBody,
-            "question_points": questionPoints,
-            "mode": mode,
-          };
-          print("[DEBUG] Question Object: ${widget.codingQuestion}");
-
-          if (widget.codingQuestion["codingquestiondomain_id"] == null) {
-            print("[DEBUG] Missing domain_id in question object");
-            return;
-          }
-
-          print(
-              "[DEBUG] Backend Requesttttttttt Payload: ${jsonEncode(backendRequest)}");
-          final token = await SharedPrefs.getToken();
-          final backendResponse = await http.post(
-            Uri.parse(
-                "http://localhost:3000/students/practice-coding-question-submit"),
-            headers: {
-              'Content-Type': 'application/json',
-              "Authorization": "Bearer $token",
-            },
-            body: jsonEncode(backendRequest),
-          );
-
-          print(
-              "[DEBUG] Backend Response: ${backendResponse.statusCode} - ${backendResponse.body}");
-
-          if (backendResponse.statusCode != 201) {
-            print("[DEBUG] Backend Submission Error: ${backendResponse.body}");
-          }
-        }
-
-        _scrollToResults();
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseBody = jsonDecode(response.body);
+        print("[DEBUG] Response Body: $responseBody");
       } else {
-        print("[DEBUG] Error Response Body: ${response.body}");
-        final errorResponse = jsonDecode(response.body);
-
-        setState(() {
-          testResults = [
-            TestCaseResult(
-              testCase: '',
-              expectedResult: '',
-              actualResult: '',
-              passed: false,
-              errorMessage:
-                  errorResponse['message'] ?? 'Compilation error occurred',
-            ),
-          ];
-        });
+        print("[DEBUG] Error Response: ${response.body}");
       }
     } catch (error) {
-      print("[DEBUG] HTTP Request Error: $error");
-
-      setState(() {
-        testResults = [
-          TestCaseResult(
-            testCase: '',
-            expectedResult: '',
-            actualResult: '',
-            passed: false,
-            errorMessage: "Failed to connect to the server. Please try again.",
-          ),
-        ];
-      });
+      print("[DEBUG] Error in _runCode: $error");
     }
   }
 
