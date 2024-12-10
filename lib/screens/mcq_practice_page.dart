@@ -498,7 +498,8 @@ class _McqQuestionDetailPageState extends State<McqQuestionDetailPage> {
     }
 
     // Check if the Answer is Correct
-    if (question['is_single_answer'] == true) {
+    // if (question['is_single_answer'] == true)
+    if (question['is_single_answer'] == 1) {
       // Single Answer
       isAnswerCorrect = selectedAnswers.isNotEmpty &&
           correctAnswers.contains(question['options'][selectedAnswers[0]]);
@@ -632,7 +633,8 @@ class _McqQuestionDetailPageState extends State<McqQuestionDetailPage> {
   @override
   Widget build(BuildContext context) {
     final question = widget.questions[currentIndex];
-    final isSingleAnswer = question['is_single_answer'] ?? false;
+    // final isSingleAnswer = question['is_single_answer'] ?? false;
+    final isSingleAnswer = question['is_single_answer'] == 1;
     final correctAnswers = question['correct_answers'] ?? [];
     final codeSnippets = question['code_snippets'] ?? '';
     final points = question['points'] ?? 0;
