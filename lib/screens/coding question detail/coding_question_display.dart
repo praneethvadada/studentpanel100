@@ -809,10 +809,11 @@ public class Main {
       Uri endpoint;
       switch (_selectedLanguage!.toLowerCase()) {
         case 'python':
-          endpoint = Uri.parse('http://localhost:8084/compile');
+          endpoint = Uri.parse('http://145.223.22.18:8080/compile');
+          // endpoint = Uri.parse('http://localhost:8084/compile');
           break;
         case 'java':
-          endpoint = Uri.parse('http://145.223.22.18:5001/run-java');
+          endpoint = Uri.parse('http://localhost:8083/compile');
           break;
         case 'cpp':
           endpoint = Uri.parse('http://localhost:8081/compile');
