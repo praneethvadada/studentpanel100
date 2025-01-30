@@ -2188,7 +2188,7 @@
 
 // // // // //   //       final backendResponse = await http.post(
 // // // // //   //         Uri.parse(
-// // // // //   //             "http://localhost:3000/students/practice-coding-question-submit"),
+// // // // //   //             "http://13.201.69.118/students/practice-coding-question-submit"),
 // // // // //   //         headers: {
 // // // // //   //           'Content-Type': 'application/json',
 // // // // //   //           "Authorization": "Bearer $token",
@@ -2380,7 +2380,7 @@
 // // // // // //       print("[DEBUG] Backend Request Payload: ${jsonEncode(backendRequest)}");
 
 // // // // // //       final backendResponse = await http.post(
-// // // // // //         Uri.parse("http://localhost:3000/students/practice-coding-question-submit"),
+// // // // // //         Uri.parse("http://13.201.69.118/students/practice-coding-question-submit"),
 // // // // // //         headers: {
 // // // // // //           'Content-Type': 'application/json',
 // // // // // //           "Authorization": "Bearer $token",
@@ -2486,7 +2486,7 @@
 
 // // // // //   //       final backendResponse = await http.post(
 // // // // //   //         Uri.parse(
-// // // // //   //             'http://localhost:3000/students/practice-coding-question-submit'),
+// // // // //   //             'http://13.201.69.118/students/practice-coding-question-submit'),
 // // // // //   //         headers: {
 // // // // //   //           'Content-Type': 'application/json',
 // // // // //   //           'Authorization': 'Bearer $token',
@@ -2560,7 +2560,7 @@
 // // // // //   //       // Send custom input request to backend
 // // // // //   //       final response = await http.post(
 // // // // //   //         Uri.parse(
-// // // // //   //             'http://localhost:3000/students/practice-coding-question-submit'),
+// // // // //   //             'http://13.201.69.118/students/practice-coding-question-submit'),
 // // // // //   //         headers: {
 // // // // //   //           'Content-Type': 'application/json',
 // // // // //   //           'Authorization': 'Bearer $token',
@@ -3073,7 +3073,7 @@
 
 // // // // //   //         final backendResponse = await http.post(
 // // // // //   //           Uri.parse(
-// // // // //   //               "http://localhost:3000/students/practice-coding-question-submit"),
+// // // // //   //               "http://13.201.69.118/students/practice-coding-question-submit"),
 // // // // //   //           headers: {
 // // // // //   //             'Content-Type': 'application/json',
 // // // // //   //             "Authorization": "Bearer $token",
@@ -3282,7 +3282,7 @@
 
 // // // // //   //         final backendResponse = await http.post(
 // // // // //   //           Uri.parse(
-// // // // //   //               "http://localhost:3000/students/practice-coding-question-submit"),
+// // // // //   //               "http://13.201.69.118/students/practice-coding-question-submit"),
 // // // // //   //           headers: {
 // // // // //   //             'Content-Type': 'application/json',
 // // // // //   //             "Authorization": "Bearer $token",
@@ -3491,7 +3491,7 @@
 
 // // // // //   //         final backendResponse = await http.post(
 // // // // //   //           Uri.parse(
-// // // // //   //               "http://localhost:3000/students/practice-coding-question-submit"),
+// // // // //   //               "http://13.201.69.118/students/practice-coding-question-submit"),
 // // // // //   //           headers: {
 // // // // //   //             'Content-Type': 'application/json',
 // // // // //   //             "Authorization": "Bearer $token",
@@ -3699,7 +3699,7 @@
 
 // // // // //   //         final backendResponse = await http.post(
 // // // // //   //           Uri.parse(
-// // // // //   //               "http://localhost:3000/students/practice-coding-question-submit"),
+// // // // //   //               "http://13.201.69.118/students/practice-coding-question-submit"),
 // // // // //   //           headers: {
 // // // // //   //             'Content-Type': 'application/json',
 // // // // //   //             "Authorization": "Bearer $token",
@@ -3913,7 +3913,7 @@
 // // // // //           final token = await SharedPrefs.getToken();
 // // // // //           final backendResponse = await http.post(
 // // // // //             Uri.parse(
-// // // // //                 "http://localhost:3000/students/practice-coding-question-submit"),
+// // // // //                 "http://13.201.69.118/students/practice-coding-question-submit"),
 // // // // //             headers: {
 // // // // //               'Content-Type': 'application/json',
 // // // // //               "Authorization": "Bearer $token",
@@ -3986,7 +3986,7 @@
 
 // // // // //   //     // API request to save the code
 // // // // //   //     final response = await http.post(
-// // // // //   //       Uri.parse('http://localhost:3000/students/auto-save-code'),
+// // // // //   //       Uri.parse('http://13.201.69.118/students/auto-save-code'),
 // // // // //   //       headers: {
 // // // // //   //         'Content-Type': 'application/json',
 // // // // //   //         "Authorization": "Bearer $token",

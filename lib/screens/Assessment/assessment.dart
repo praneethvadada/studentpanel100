@@ -61,7 +61,7 @@ import 'package:studentpanel100/utils/shared_prefs.dart';
 //     final token = await SharedPrefs.getToken();
 //     try {
 //       final response = await http.post(
-//         Uri.parse('http://localhost:3000/timer/exam/end'),
+//         Uri.parse('http://13.201.69.118/timer/exam/end'),
 //         headers: {
 //           'Content-Type': 'application/json',
 //           'Authorization': 'Bearer $token',
@@ -91,7 +91,7 @@ import 'package:studentpanel100/utils/shared_prefs.dart';
 //     final token = await SharedPrefs.getToken();
 //     try {
 //       await http.post(
-//         Uri.parse('http://localhost:3000/timer/exam/update-remaining'),
+//         Uri.parse('http://13.201.69.118/timer/exam/update-remaining'),
 //         headers: {
 //           'Content-Type': 'application/json',
 //           'Authorization': 'Bearer $token',
@@ -111,7 +111,7 @@ import 'package:studentpanel100/utils/shared_prefs.dart';
 //       final token = await SharedPrefs.getToken();
 //       final response = await http.get(
 //         Uri.parse(
-//             'http://localhost:3000/assessments/round/${widget.roundId}/questions'),
+//             'http://13.201.69.118/assessments/round/${widget.roundId}/questions'),
 //         headers: {'Authorization': 'Bearer $token'},
 //       );
 
@@ -270,7 +270,7 @@ import 'package:studentpanel100/utils/shared_prefs.dart';
 //   //     final token = await SharedPrefs.getToken();
 //   //     final response = await http.get(
 //   //       Uri.parse(
-//   //           'http://localhost:3000/assessments/round/${widget.roundId}/questions'),
+//   //           'http://13.201.69.118/assessments/round/${widget.roundId}/questions'),
 //   //       headers: {'Authorization': 'Bearer $token'},
 //   //     );
 
@@ -302,7 +302,7 @@ import 'package:studentpanel100/utils/shared_prefs.dart';
 //       final token = await SharedPrefs.getToken();
 //       final response = await http.get(
 //         Uri.parse(
-//             'http://localhost:3000/assessments/round/${widget.roundId}/questions'),
+//             'http://13.201.69.118/assessments/round/${widget.roundId}/questions'),
 //         headers: {'Authorization': 'Bearer $token'},
 //       );
 
@@ -434,7 +434,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
       final token = await SharedPrefs.getToken();
       final response = await http.get(
         Uri.parse(
-            'http://localhost:3000/assessments/round/${widget.roundId}/questions'),
+            'http://13.201.69.118/assessments/round/${widget.roundId}/questions'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -562,7 +562,7 @@ class _AssessmentPageState extends State<AssessmentPage> {
     final token = await SharedPrefs.getToken(); // Fetch the JWT token
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:3000/assessments/live'),
+        Uri.parse('http://13.201.69.118/assessments/live'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -591,7 +591,7 @@ class _AssessmentPageState extends State<AssessmentPage> {
       // Check for active session
       final sessionResponse = await http.get(
         Uri.parse(
-            'http://localhost:3000/timer/exam/active?assessment_id=$assessmentId'),
+            'http://13.201.69.118/timer/exam/active?assessment_id=$assessmentId'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -623,7 +623,7 @@ class _AssessmentPageState extends State<AssessmentPage> {
     // Start a new session
     try {
       final response = await http.post(
-        Uri.parse('http://localhost:3000/timer/exam/start'),
+        Uri.parse('http://13.201.69.118/timer/exam/start'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -790,7 +790,7 @@ class _RoundsPageState extends State<RoundsPage> {
     final token = await SharedPrefs.getToken();
     try {
       await http.post(
-        Uri.parse('http://localhost:3000/timer/exam/update-remaining'),
+        Uri.parse('http://13.201.69.118/timer/exam/update-remaining'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -810,7 +810,7 @@ class _RoundsPageState extends State<RoundsPage> {
     try {
       final response = await http.get(
         Uri.parse(
-            'http://localhost:3000/assessments/${widget.assessmentId}/rounds'),
+            'http://13.201.69.118/assessments/${widget.assessmentId}/rounds'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -861,7 +861,7 @@ class _RoundsPageState extends State<RoundsPage> {
     final token = await SharedPrefs.getToken();
     try {
       final response = await http.post(
-        Uri.parse('http://localhost:3000/timer/exam/end'),
+        Uri.parse('http://13.201.69.118/timer/exam/end'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -998,7 +998,7 @@ class _RoundsPageState extends State<RoundsPage> {
 //     final token = await SharedPrefs.getToken();
 //     try {
 //       await http.post(
-//         Uri.parse('http://localhost:3000/timer/exam/update-remaining'),
+//         Uri.parse('http://13.201.69.118/timer/exam/update-remaining'),
 //         headers: {
 //           'Content-Type': 'application/json',
 //           'Authorization': 'Bearer $token',
@@ -1020,7 +1020,7 @@ class _RoundsPageState extends State<RoundsPage> {
 
 //       final response = await http.get(
 //         Uri.parse(
-//             'http://localhost:3000/assessments/round/${widget.roundId}/questions'),
+//             'http://13.201.69.118/assessments/round/${widget.roundId}/questions'),
 //         headers: {'Authorization': 'Bearer $token'},
 //       );
 
@@ -1091,7 +1091,7 @@ class _RoundsPageState extends State<RoundsPage> {
 //     final token = await SharedPrefs.getToken();
 //     try {
 //       final response = await http.post(
-//         Uri.parse('http://localhost:3000/timer/exam/end'),
+//         Uri.parse('http://13.201.69.118/timer/exam/end'),
 //         headers: {
 //           'Content-Type': 'application/json',
 //           'Authorization': 'Bearer $token',

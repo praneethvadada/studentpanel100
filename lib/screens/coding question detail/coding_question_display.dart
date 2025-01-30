@@ -933,7 +933,7 @@ public class Main {
           final token = await SharedPrefs.getToken();
           final backendResponse = await http.post(
             Uri.parse(
-                "http://localhost:3000/students/practice-coding-question-submit"),
+                "http://13.201.69.118/students/practice-coding-question-submit"),
             headers: {
               'Content-Type': 'application/json',
               "Authorization": "Bearer $token",

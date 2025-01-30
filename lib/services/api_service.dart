@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 class ApiService {
-  static const String baseUrl = "http://localhost:3000/students";
+  static const String baseUrl = "http://13.201.69.118/students";
 
   // Method to handle token expiration and redirect to login page
   static Future<void> _handleExpiredToken(BuildContext context) async {
@@ -126,7 +126,7 @@ class ApiService {
 
     if (token != null) {
       final response = await http.get(
-        Uri.parse('http://localhost:3000/assessments/live'),
+        Uri.parse('http://13.201.69.118/assessments/live'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -149,7 +149,7 @@ class ApiService {
 
     if (token != null) {
       final response = await http.get(
-        Uri.parse('http://localhost:3000/assessments/$assessmentId/rounds'),
+        Uri.parse('http://13.201.69.118/assessments/$assessmentId/rounds'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -172,7 +172,7 @@ class ApiService {
 
     if (token != null) {
       final response = await http.get(
-        Uri.parse('http://localhost:3000/assessments/round/$roundId/questions'),
+        Uri.parse('http://13.201.69.118/assessments/round/$roundId/questions'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -197,7 +197,7 @@ class ApiService {
 // import 'package:flutter/material.dart';
 
 // class ApiService {
-//   static const String baseUrl = "http://localhost:3000/students";
+//   static const String baseUrl = "http://13.201.69.118/students";
 // // Method to handle token expiration and redirect to login page
 //   static Future<void> _handleExpiredToken(BuildContext context) async {
 //     await SharedPrefs.removeToken();
@@ -300,7 +300,7 @@ class ApiService {
 // // import '../utils/shared_prefs.dart';
 
 // // class ApiService {
-// //   static const String baseUrl = "http://localhost:3000/students";
+// //   static const String baseUrl = "http://13.201.69.118/students";
 // //   static Future<Map<String, String>> _getHeaders() async {
 // //     final token =
 // //         await SharedPrefs.getToken(); // Retrieve token from SharedPreferences
@@ -414,7 +414,7 @@ class ApiService {
 
 // // // class ApiService {
 // // //   // Example API base URL
-// //   // static const String baseUrl = "http://localhost:3000";
+// //   // static const String baseUrl = "http://13.201.69.118";
 
 // //   // // Helper function to get the token and return the headers with the JWT token
 // //   // static Future<Map<String, String>> _getHeaders() async {
@@ -470,7 +470,7 @@ class ApiService {
 // // // // import '../utils/shared_prefs.dart';
 
 // // // // class ApiService {
-// // // //   static const String baseUrl = "http://localhost:3000/students";
+// // // //   static const String baseUrl = "http://13.201.69.118/students";
 
 // // // //   static Future<Map<String, dynamic>> login(
 // // // //       String email, String password) async {

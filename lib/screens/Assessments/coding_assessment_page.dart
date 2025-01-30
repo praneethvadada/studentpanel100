@@ -15,9 +15,11 @@ class CodingQuestionWidget extends StatefulWidget {
   final Map<String, dynamic> codingQuestion;
   final CodeController codeController;
 
-  const CodingQuestionWidget({Key? key, required this.codingQuestion,     required this.codeController,
-})
-      : super(key: key);
+  const CodingQuestionWidget({
+    Key? key,
+    required this.codingQuestion,
+    required this.codeController,
+  }) : super(key: key);
 
   @override
   State<CodingQuestionWidget> createState() => _CodingQuestionWidgetState();
@@ -93,7 +95,7 @@ class _CodingQuestionWidgetState extends State<CodingQuestionWidget>
       final token = await SharedPrefs.getToken();
       final response = await http.get(
         Uri.parse(
-            "http://localhost:3000/assessments/fetch-code?question_id=${widget.codingQuestion['id']}&round_id=${widget.codingQuestion['round_id']}"),
+            "http://13.201.69.118/assessments/fetch-code?question_id=${widget.codingQuestion['id']}&round_id=${widget.codingQuestion['round_id']}"),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -129,7 +131,7 @@ class _CodingQuestionWidgetState extends State<CodingQuestionWidget>
       };
 
       final response = await http.post(
-        Uri.parse("http://localhost:3000/assessments/save-code"),
+        Uri.parse("http://13.201.69.118/assessments/save-code"),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -1151,7 +1153,7 @@ int main() {
 
       final response = await http.post(
         Uri.parse(
-            "http://localhost:3000/assessments/assessment-coding-question-submit"),
+            "http://13.201.69.118/assessments/assessment-coding-question-submit"),
         headers: {
           'Content-Type': 'application/json',
           "Authorization": "Bearer $token",
@@ -1713,7 +1715,7 @@ class TestCaseResultsTable extends StatelessWidget {
 //       final token = await SharedPrefs.getToken();
 //       final response = await http.get(
 //         Uri.parse(
-//             "http://localhost:3000/assessments/fetch-code?question_id=${widget.codingQuestion['id']}&round_id=${widget.codingQuestion['round_id']}"),
+//             "http://13.201.69.118/assessments/fetch-code?question_id=${widget.codingQuestion['id']}&round_id=${widget.codingQuestion['round_id']}"),
 //         headers: {
 //           'Content-Type': 'application/json',
 //           'Authorization': 'Bearer $token',
@@ -1748,7 +1750,7 @@ class TestCaseResultsTable extends StatelessWidget {
 //   //       "language": _selectedLanguage,
 //   //     };
 //   //     final response = await http.post(
-//   //       Uri.parse("http://localhost:3000/assessments/save-code"),
+//   //       Uri.parse("http://13.201.69.118/assessments/save-code"),
 //   //       headers: {
 //   //         'Content-Type': 'application/json',
 //   //         'Authorization': 'Bearer $token',
@@ -2769,7 +2771,7 @@ class TestCaseResultsTable extends StatelessWidget {
 
 //       final response = await http.post(
 //         Uri.parse(
-//             "http://localhost:3000/assessments/assessment-coding-question-submit"),
+//             "http://13.201.69.118/assessments/assessment-coding-question-submit"),
 //         headers: {
 //           'Content-Type': 'application/json',
 //           "Authorization": "Bearer $token",
@@ -3110,7 +3112,7 @@ class TestCaseResultsTable extends StatelessWidget {
 //   //       "language": _selectedLanguage,
 //   //     };
 //   //     final response = await http.post(
-//   //       Uri.parse("http://localhost:3000/assessments/save-code"),
+//   //       Uri.parse("http://13.201.69.118/assessments/save-code"),
 //   //       headers: {
 //   //         'Content-Type': 'application/json',
 //   //         'Authorization': 'Bearer $token',
@@ -3138,7 +3140,7 @@ class TestCaseResultsTable extends StatelessWidget {
 
 //     try {
 //       final response = await http.post(
-//         Uri.parse("http://localhost:3000/assessments/save-code"),
+//         Uri.parse("http://13.201.69.118/assessments/save-code"),
 //         headers: {
 //           'Content-Type': 'application/json',
 //           'Authorization': 'Bearer $token',
@@ -3202,7 +3204,7 @@ class TestCaseResultsTable extends StatelessWidget {
 //       final token = await SharedPrefs.getToken();
 //       final response = await http.get(
 //         Uri.parse(
-//             "http://localhost:3000/assessments/fetch-code?question_id=${widget.codingQuestion['id']}&round_id=${widget.codingQuestion['round_id']}"),
+//             "http://13.201.69.118/assessments/fetch-code?question_id=${widget.codingQuestion['id']}&round_id=${widget.codingQuestion['round_id']}"),
 //         headers: {
 //           'Content-Type': 'application/json',
 //           'Authorization': 'Bearer $token',
